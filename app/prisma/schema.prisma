@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model TokenProject {
+  id                 String               @id @default(cuid())
+  name               String
+  domain             String
+  tokenSymbol        String
+  totalSupply        Float?
+  tgeDate            DateTime?
+  demandModel        String?
+  marketCapModel     String?
+  sellPressureModel  String?
+  snapshotJson       String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  distributionGroups DistributionGroup[]
+  comparisonSnapshots ComparisonSnapshot[]
+}
+
+model DistributionGroup {
+  id                  String          @id @default(cuid())
+  projectId           String
+  project             TokenProject    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name                String
+  allocationPct       Float
+  type                String
+  category            String
+  notes               String?
+  tgeUnlockPct        Float           @default(0)
+  cliffMonths         Int             @default(0)
+  vestMonths          Int             @default(0)
+  unlockFrequency     String          @default("MONTHLY")
+  startMonth          Int             @default(0)
+  sellPreset          String?
+  costBasisUsd        Float?
+  impliedFdvAtTge     Float?
+  sellPctOfUnlocked   Float?
+  includeInSellPressure Boolean       @default(true)
+  metadata            String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+}
+
+model ComparisonSnapshot {
+  id         String       @id @default(cuid())
+  projectId  String
+  project    TokenProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  snapshot   String
+  createdAt  DateTime     @default(now())
+}
+

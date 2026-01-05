@@ -1,0 +1,7 @@
+{
+  "NOT_SELLER": { "label": "Not seller", "sellPctOfUnlocked": 0 },
+  "CONSERVATIVE": { "label": "Conservative", "sellPctOfUnlocked": 0.15 },
+  "MODERATE": { "label": "Moderate", "sellPctOfUnlocked": 0.4 },
+  "AGGRESSIVE": { "label": "Aggressive", "sellPctOfUnlocked": 0.85 }
+}
+

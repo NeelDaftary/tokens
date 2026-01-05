@@ -1,0 +1,51 @@
+{
+  "DEFI": {
+    "name": "DeFi Default",
+    "groups": [
+      { "name": "Core Contributors", "allocationPct": 20, "type": "INTERNAL", "category": "Core Contributors", "tgeUnlockPct": 0, "cliffMonths": 12, "vestMonths": 36, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Advisors", "allocationPct": 5, "type": "INTERNAL", "category": "Advisors", "tgeUnlockPct": 0, "cliffMonths": 6, "vestMonths": 24, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Seed", "allocationPct": 10, "type": "EXTERNAL", "category": "Private Investors", "tgeUnlockPct": 10, "cliffMonths": 6, "vestMonths": 24, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Private", "allocationPct": 10, "type": "EXTERNAL", "category": "Private Investors", "tgeUnlockPct": 10, "cliffMonths": 6, "vestMonths": 18, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Public Sale", "allocationPct": 5, "type": "EXTERNAL", "category": "Public Sale", "tgeUnlockPct": 25, "cliffMonths": 0, "vestMonths": 12, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Treasury", "allocationPct": 15, "type": "INTERNAL", "category": "Treasury", "tgeUnlockPct": 0, "cliffMonths": 0, "vestMonths": 48, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Ecosystem Incentives", "allocationPct": 15, "type": "EXTERNAL", "category": "Ecosystem Incentives", "tgeUnlockPct": 0, "cliffMonths": 0, "vestMonths": 36, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Staking Rewards", "allocationPct": 10, "type": "EXTERNAL", "category": "Staking Rewards", "tgeUnlockPct": 0, "cliffMonths": 0, "vestMonths": 48, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Liquidity Mining", "allocationPct": 5, "type": "EXTERNAL", "category": "Liquidity Mining", "tgeUnlockPct": 0, "cliffMonths": 0, "vestMonths": 24, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Airdrop", "allocationPct": 3, "type": "EXTERNAL", "category": "Airdrop", "tgeUnlockPct": 50, "cliffMonths": 0, "vestMonths": 6, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Partnerships", "allocationPct": 2, "type": "EXTERNAL", "category": "Partnerships", "tgeUnlockPct": 0, "cliffMonths": 3, "vestMonths": 24, "unlockFrequency": "MONTHLY", "startMonth": 0 }
+    ]
+  },
+  "DEPIN": {
+    "name": "DePIN Default",
+    "groups": [
+      { "name": "Core Contributors", "allocationPct": 18, "type": "INTERNAL", "category": "Core Contributors", "tgeUnlockPct": 0, "cliffMonths": 12, "vestMonths": 36, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Advisors", "allocationPct": 4, "type": "INTERNAL", "category": "Advisors", "tgeUnlockPct": 0, "cliffMonths": 6, "vestMonths": 24, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Seed", "allocationPct": 8, "type": "EXTERNAL", "category": "Private Investors", "tgeUnlockPct": 10, "cliffMonths": 6, "vestMonths": 24, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Private", "allocationPct": 10, "type": "EXTERNAL", "category": "Private Investors", "tgeUnlockPct": 10, "cliffMonths": 6, "vestMonths": 18, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Public Sale", "allocationPct": 5, "type": "EXTERNAL", "category": "Public Sale", "tgeUnlockPct": 25, "cliffMonths": 0, "vestMonths": 12, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Treasury", "allocationPct": 15, "type": "INTERNAL", "category": "Treasury", "tgeUnlockPct": 0, "cliffMonths": 0, "vestMonths": 48, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Ecosystem Incentives", "allocationPct": 18, "type": "EXTERNAL", "category": "Ecosystem Incentives", "tgeUnlockPct": 0, "cliffMonths": 0, "vestMonths": 36, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Staking Rewards", "allocationPct": 8, "type": "EXTERNAL", "category": "Staking Rewards", "tgeUnlockPct": 0, "cliffMonths": 0, "vestMonths": 48, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Liquidity Mining", "allocationPct": 6, "type": "EXTERNAL", "category": "Liquidity Mining", "tgeUnlockPct": 0, "cliffMonths": 0, "vestMonths": 24, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Airdrop", "allocationPct": 5, "type": "EXTERNAL", "category": "Airdrop", "tgeUnlockPct": 50, "cliffMonths": 0, "vestMonths": 6, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Partnerships", "allocationPct": 3, "type": "EXTERNAL", "category": "Partnerships", "tgeUnlockPct": 0, "cliffMonths": 3, "vestMonths": 24, "unlockFrequency": "MONTHLY", "startMonth": 0 }
+    ]
+  },
+  "L1L2": {
+    "name": "L1/L2 Default",
+    "groups": [
+      { "name": "Core Contributors", "allocationPct": 22, "type": "INTERNAL", "category": "Core Contributors", "tgeUnlockPct": 0, "cliffMonths": 12, "vestMonths": 48, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Advisors", "allocationPct": 4, "type": "INTERNAL", "category": "Advisors", "tgeUnlockPct": 0, "cliffMonths": 6, "vestMonths": 24, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Seed", "allocationPct": 8, "type": "EXTERNAL", "category": "Private Investors", "tgeUnlockPct": 10, "cliffMonths": 6, "vestMonths": 24, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Private", "allocationPct": 10, "type": "EXTERNAL", "category": "Private Investors", "tgeUnlockPct": 10, "cliffMonths": 6, "vestMonths": 18, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Public Sale", "allocationPct": 6, "type": "EXTERNAL", "category": "Public Sale", "tgeUnlockPct": 25, "cliffMonths": 0, "vestMonths": 12, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Treasury", "allocationPct": 18, "type": "INTERNAL", "category": "Treasury", "tgeUnlockPct": 0, "cliffMonths": 0, "vestMonths": 60, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Ecosystem Incentives", "allocationPct": 15, "type": "EXTERNAL", "category": "Ecosystem Incentives", "tgeUnlockPct": 0, "cliffMonths": 0, "vestMonths": 48, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Staking Rewards", "allocationPct": 8, "type": "EXTERNAL", "category": "Staking Rewards", "tgeUnlockPct": 0, "cliffMonths": 0, "vestMonths": 60, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Liquidity Mining", "allocationPct": 4, "type": "EXTERNAL", "category": "Liquidity Mining", "tgeUnlockPct": 0, "cliffMonths": 0, "vestMonths": 24, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Airdrop", "allocationPct": 3, "type": "EXTERNAL", "category": "Airdrop", "tgeUnlockPct": 50, "cliffMonths": 0, "vestMonths": 6, "unlockFrequency": "MONTHLY", "startMonth": 0 },
+      { "name": "Partnerships", "allocationPct": 2, "type": "EXTERNAL", "category": "Partnerships", "tgeUnlockPct": 0, "cliffMonths": 3, "vestMonths": 24, "unlockFrequency": "MONTHLY", "startMonth": 0 }
+    ]
+  }
+}
+
