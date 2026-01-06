@@ -476,6 +476,12 @@ export default function Home() {
             >
               Staking
             </button>
+            <a
+              href="/depin"
+              className="ml-auto rounded border border-blue-600 bg-blue-600/10 px-4 py-2 text-sm font-medium text-blue-400 transition-colors hover:bg-blue-600/20"
+            >
+              DePIN Simulation →
+            </a>
           </div>
         </header>
 
@@ -1489,7 +1495,7 @@ export default function Home() {
                   </div>
                   <div className="text-[10px] text-neutral-500 mt-1">market health indicator</div>
                 </div>
-              </div>
+        </div>
             </section>
           </>
         )}

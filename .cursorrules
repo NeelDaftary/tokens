@@ -1,0 +1,77 @@
+# Cursor AI Rules for Token Design Toolkit Project
+
+## Critical Workflow Rules
+
+### NEVER Pause Midway Through Tasks
+- When given a task with multiple steps, complete ALL steps without stopping
+- Do NOT pause to ask "would you like me to continue?" - just continue
+- Do NOT stop to summarize progress unless explicitly asked
+- Do NOT wait for approval between subtasks
+- Complete ALL TODOs before considering the task done
+- If you have 5 unfinished TODOs, finish all 5 before stopping
+- The user will tell you if they want you to stop
+
+### Multi-Agent System (Planner/Executor)
+- Planner: High-level analysis, task breakdown, success criteria
+- Executor: Implementation, code writing, testing
+- Only Planner can announce task completion (after cross-checking)
+- Executor reports progress at milestones or when blocked
+
+### Development Practices
+- Test Driven Development (TDD) when possible
+- Test each functionality before moving to next task
+- Fix bugs immediately when found
+- Use simple, efficient approaches - no overengineering
+- Mark tasks complete only after success criteria met and tests pass
+
+### Code Quality
+- Include debugging info in program output
+- Read files before editing them
+- Check vulnerabilities (run npm audit if warnings appear)
+- Ask before using --force git commands
+- Document lessons learned to avoid repeating mistakes
+
+### Communication
+- Don't give uncertain answers - say when you're not 100% confident
+- Non-technical user won't catch wrong approaches - be honest about uncertainty
+- Update scratchpad.md with reusable project info and lessons
+- Document fixes and corrections to avoid same mistakes
+
+## Project-Specific Rules
+
+### Tech Stack
+- Next.js 16 (App Router), TypeScript, Tailwind, shadcn/ui
+- Prisma ORM with SQLite (easy swap to Postgres later)
+- Node 20 (use `nvm use 20` for Prisma commands)
+- pnpm as package manager
+
+### Database
+- Use String for JSON fields (SQLite doesn't support native JSON)
+- Use Float for numbers (avoid Decimal with SQLite)
+- Use String for enums (SQLite doesn't support native enums)
+
+### Lessons Learned
+- Prisma 7 on Node 22 has ESM issues; use Prisma 5.21 with Node 20
+- Tab navigation requires React fragments (<>) for multiple siblings
+- Recharts needs explicit height on ResponsiveContainer
+- For demand/sell calculations, separate logic into lib/ files for testability
+- Use HSL colors for chart variations: hsl(hue + idx * step, sat%, light%)
+- Profit multipliers make sell pressure realistic (100x returns = 3x sell rate)
+- Staking demand uses sigmoid curves for yield-spread-to-participation
+- DePIN simulations require seeded RNG for reproducibility
+
+## Current Project Structure
+
+### Tabs
+1. Distribution & Emissions - token distribution, vesting, unlock schedules
+2. Token Demand & Sell Pressure - demand sources, sell pressure modeling, 3 charts
+3. Staking - staking program designer across 5 archetypes
+4. DePIN (in progress) - decentralized infrastructure network simulation
+
+### Key Features
+- Dark mode UI throughout
+- Save/load projects to SQLite via Prisma
+- Recharts for all visualizations
+- Comprehensive presets for quick starts
+- Full data persistence across all features
+
