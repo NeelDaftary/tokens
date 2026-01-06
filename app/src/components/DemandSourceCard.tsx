@@ -33,8 +33,8 @@ export default function DemandSourceCard({ source, onUpdate, onToggle }: DemandS
   const handleConfigUpdate = (field: string, value: any) => {
     onUpdate({
       ...source,
-      config: { ...source.config, [field]: value },
-    });
+      config: { ...source.config, [field]: value } as any,
+    } as DemandSourceConfig);
   };
 
   const renderSimpleForm = () => {

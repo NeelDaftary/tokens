@@ -33,10 +33,11 @@ type ProjectPayload = {
 
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const project = await prisma.tokenProject.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: { distributionGroups: true, comparisonSnapshots: true },
   });
   if (!project) {
@@ -47,12 +48,13 @@ export async function GET(
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = (await req.json()) as ProjectPayload;
     const existing = await prisma.tokenProject.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -99,15 +101,15 @@ export async function PUT(
     const groups = body.distributionGroups;
     const project = await prisma.$transaction(async (tx) => {
       const updated = await tx.tokenProject.update({
-        where: { id: params.id },
+        where: { id },
         data: updateData,
       });
 
       if (groups) {
-        await tx.distributionGroup.deleteMany({ where: { projectId: params.id } });
+        await tx.distributionGroup.deleteMany({ where: { projectId: id } });
         await tx.distributionGroup.createMany({
           data: groups.map((g) => ({
-            projectId: params.id,
+            projectId: id,
             name: g.name,
             allocationPct: g.allocationPct,
             type: g.type,
@@ -133,7 +135,7 @@ export async function PUT(
     });
 
     const withRelations = await prisma.tokenProject.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { distributionGroups: true, comparisonSnapshots: true },
     });
 
@@ -146,10 +148,11 @@ export async function PUT(
 
 export async function DELETE(
   _req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await prisma.tokenProject.delete({ where: { id: params.id } });
+    const { id } = await params;
+    await prisma.tokenProject.delete({ where: { id } });
     return NextResponse.json({ ok: true });
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete project" }, { status: 500 });

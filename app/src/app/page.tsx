@@ -1328,7 +1328,7 @@ export default function Home() {
                             }}
                           />
                           <Tooltip 
-                            formatter={(value: number | undefined, name: string) => {
+                            formatter={(value: number | undefined, name: string | undefined) => {
                               if (value === undefined) return '';
                               const label = name === 'net' ? 'Net Pressure' : name === 'demand' ? 'Total Demand' : 'Total Sell';
                               return [fmt(value), label];
@@ -1338,10 +1338,6 @@ export default function Home() {
                           />
                           <Bar
                             dataKey="net"
-                            fill={(data: any) => {
-                              const netValue = data?.net || 0;
-                              return netValue >= 0 ? 'hsl(120, 60%, 45%)' : 'hsl(0, 65%, 50%)';
-                            }}
                           >
                             {netPressureData.series.slice(0, demandHorizonMonths + 1).map((entry, index) => (
                               <Cell 
