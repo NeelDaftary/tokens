@@ -212,4 +212,9 @@ The tool helps token designers, founders, and investors understand token economi
 - Separating computation engine from UI allows for complex multi-step calculations (price series → rewards → APR → demand target → actual staking ratio) to be pure functions, easily testable and debuggable.
 - Stress tests as one-click buttons with alert outputs provide immediate insights: designers can quickly see impact of rate hikes, fee drawdowns, price crashes without manual parameter tweaking.
 - Cohort modeling (LST, Restaking, ve) adds depth: different participant types with different yield profiles and lockup requirements show the full complexity of modern staking systems.
+- DePIN simulation ported from Python radCAD to TypeScript: full feature parity achieved with deterministic seeding, provider dynamics, token flows, and statistical aggregation across Monte Carlo runs.
+- Next.js 16 breaking change: params in API routes are now Promise<{id}> instead of {id}, requiring `const {id} = await params` pattern.
+- Recharts Bar fill prop no longer accepts functions in newer versions; use Cell components inside Bar for conditional coloring.
+- TypeScript config spreading with dynamic keys needs type assertions: `{...config, [field]: value} as ConfigType` to maintain type safety.
+- All 4 major tabs (Distribution, Demand/Sell, Staking, DePIN) now complete with full UI, calculations, charts, and persistence. Dev server running successfully at http://127.0.0.1:3001.
 
