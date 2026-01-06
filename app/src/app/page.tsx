@@ -20,6 +20,7 @@ import {
 import DemandSourceCard from "@/components/DemandSourceCard";
 import SellPressureTable from "@/components/SellPressureTable";
 import StakingTab from "@/components/StakingTab";
+import SimulatorSidebar from "@/components/SimulatorSidebar";
 import type { DemandSourceConfig, SellPressureConfig } from "@/types/demand";
 import { SELL_PRESSURE_PRESETS } from "@/types/demand";
 import { 
@@ -159,6 +160,7 @@ export default function Home() {
   const [pieChartMode, setPieChartMode] = useState<"endState" | "instantaneous">("endState");
   const [selectedMonth, setSelectedMonth] = useState(0);
   const [activeTab, setActiveTab] = useState<"emissions" | "demand" | "staking">("emissions");
+  const [isSimulatorSidebarOpen, setIsSimulatorSidebarOpen] = useState(false);
   
   // Demand tab state
   const [demandHorizonMonths, setDemandHorizonMonths] = useState(36);
@@ -476,12 +478,13 @@ export default function Home() {
             >
               Staking
             </button>
-            <a
-              href="/depin"
-              className="ml-auto rounded border border-blue-600 bg-blue-600/10 px-4 py-2 text-sm font-medium text-blue-400 transition-colors hover:bg-blue-600/20"
+            <button
+              onClick={() => setIsSimulatorSidebarOpen(true)}
+              className="ml-auto flex items-center gap-2 rounded border border-blue-600 bg-blue-600/10 px-4 py-2 text-sm font-medium text-blue-400 transition-colors hover:bg-blue-600/20"
             >
-              DePIN Simulation →
-            </a>
+              <span>⚡</span>
+              Simulators
+            </button>
           </div>
         </header>
 
@@ -1500,6 +1503,12 @@ export default function Home() {
           <StakingTab />
         )}
       </main>
+
+      {/* Simulator Sidebar */}
+      <SimulatorSidebar
+        isOpen={isSimulatorSidebarOpen}
+        onClose={() => setIsSimulatorSidebarOpen(false)}
+      />
     </div>
   );
 }

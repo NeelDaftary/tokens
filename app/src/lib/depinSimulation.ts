@@ -44,9 +44,14 @@ class SeededRNG implements DePINRNG {
     const L = Math.exp(-lambda);
     let k = 0;
     let p = 1;
+    const maxIterations = 1000; // Safety limit
     do {
       k++;
       p *= this.random();
+      if (k > maxIterations) {
+        console.warn(`Poisson exceeded max iterations for lambda=${lambda}`);
+        return k - 1;
+      }
     } while (p > L);
     return k - 1;
   }
@@ -164,9 +169,21 @@ function generateCandidateProviders(
 function shouldProviderOnboard(
   provider: Provider,
   rewardRate: number,
-  tokenPrice: number
+  tokenPrice: number,
+  totalCapacity: number,
+  mintedTokens: number
 ): boolean {
-  // Provider onboards if expected revenue > cost
+  // Bootstrap: If network is empty, allow providers to onboard based on potential future rewards
+  if (totalCapacity === 0) {
+    // Estimate potential reward rate if this provider joins
+    // Assume some baseline minting will happen (use half of what was minted, or default to 1000)
+    const estimatedMint = mintedTokens > 0 ? mintedTokens : 1000;
+    const potentialRewardRate = estimatedMint / provider.capacity;
+    const potentialRevenue = provider.capacity * potentialRewardRate * tokenPrice;
+    return potentialRevenue > provider.cost;
+  }
+  
+  // Normal case: Provider onboards if expected revenue > cost
   const expectedRevenue = provider.capacity * rewardRate * tokenPrice;
   return expectedRevenue > provider.cost;
 }
@@ -364,7 +381,13 @@ function simulateStep(
 
   // 4. Onboard new providers
   for (const candidate of candidates) {
-    if (shouldProviderOnboard(candidate, state.rewardRate, state.tokenPrice)) {
+    if (shouldProviderOnboard(
+      candidate, 
+      state.rewardRate, 
+      state.tokenPrice,
+      state.totalCapacity,
+      state.mintedTokens
+    )) {
       candidate.isActive = true;
       candidate.joinedAt = timestep;
       state.providers.push(candidate);
@@ -461,7 +484,7 @@ export function runDePINSimulation(
   const seedUsed = params.seed !== undefined ? params.seed : Math.floor(Math.random() * 1000000);
   
   const runs: SimulationRun[] = [];
-
+  
   for (let runId = 0; runId < params.runs; runId++) {
     const runSeed = seedUsed + runId;
     const rng = new SeededRNG(runSeed);
@@ -496,8 +519,11 @@ export function runDePINSimulation(
       state = simulateStep(state, config, t, previousDemand, rng);
       previousDemand = state.demand;
       
-      // Deep copy state for storage
-      states.push(JSON.parse(JSON.stringify(state)));
+      // Store state (keep providers as shallow reference to avoid deep copy issues)
+      states.push({
+        ...state,
+        providers: [], // Don't store full provider history to avoid memory issues
+      });
     }
 
     runs.push({
