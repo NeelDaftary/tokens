@@ -19,6 +19,7 @@ import {
 } from "recharts";
 import DemandSourceCard from "@/components/DemandSourceCard";
 import SellPressureTable from "@/components/SellPressureTable";
+import StakingTab from "@/components/StakingTab";
 import type { DemandSourceConfig, SellPressureConfig } from "@/types/demand";
 import { SELL_PRESSURE_PRESETS } from "@/types/demand";
 import { 
@@ -157,7 +158,7 @@ export default function Home() {
   const [horizonMonths, setHorizonMonths] = useState(36);
   const [pieChartMode, setPieChartMode] = useState<"endState" | "instantaneous">("endState");
   const [selectedMonth, setSelectedMonth] = useState(0);
-  const [activeTab, setActiveTab] = useState<"emissions" | "demand">("emissions");
+  const [activeTab, setActiveTab] = useState<"emissions" | "demand" | "staking">("emissions");
   
   // Demand tab state
   const [demandHorizonMonths, setDemandHorizonMonths] = useState(36);
@@ -464,6 +465,16 @@ export default function Home() {
               }`}
             >
               Token Demand
+            </button>
+            <button
+              onClick={() => setActiveTab("staking")}
+              className={`px-4 py-2 text-sm font-medium transition-colors ${
+                activeTab === "staking"
+                  ? "border-b-2 border-blue-500 text-white"
+                  : "text-neutral-400 hover:text-neutral-200"
+              }`}
+            >
+              Staking
             </button>
           </div>
         </header>
@@ -1481,6 +1492,10 @@ export default function Home() {
               </div>
             </section>
           </>
+        )}
+
+        {activeTab === "staking" && (
+          <StakingTab />
         )}
       </main>
     </div>

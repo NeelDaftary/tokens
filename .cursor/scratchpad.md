@@ -128,9 +128,49 @@ The tool helps token designers, founders, and investors understand token economi
 
 ## Current Status / Progress Tracking
 
-**Status**: Tab 1 (Distribution & Emissions) and Tab 2 (Token Demand and Sell Pressure) complete. Tab navigation working. Tab 1 has full dark mode UI with distribution groups (add/delete/edit), per-group color pickers, pie chart with 2 modes, and stacked bar chart for unlocks. Tab 2 has demand modeling, sell pressure configuration, and three charts for market pressure analysis with comprehensive summary stats.
+**Status**: Tab 1 (Distribution & Emissions), Tab 2 (Token Demand and Sell Pressure), and Tab 3 (Staking Program Designer) complete. Three-tab navigation working. Tab 1 has full dark mode UI with distribution groups (add/delete/edit), per-group color pickers, pie chart with 2 modes, and stacked bar chart for unlocks. Tab 2 has demand modeling, sell pressure configuration, and three charts for market pressure analysis. Tab 3 has comprehensive staking simulation across 5 archetypes with demand modeling, yield calculations, and stress testing.
 
-**Last Updated**: Sell Pressure feature complete. Implemented:
+**Last Updated**: DePIN Simulation Module core engine complete (TypeScript port from Python radCAD). Implemented:
+
+### In Progress: DePIN Simulation Module
+1. **Complete Type System** (`/types/depin.ts` - 327 lines): All DePIN types, demand scenarios, macro conditions, provider states, protocol parameters, aggregation structures
+2. **6 Production Presets** (`/data/presets/depinPresets.ts` - 326 lines): Baseline Growth, Bear Market Stress Test, High Burn/Low Mint, Incentive Launch, Volatile Market, Minimal Burn scenarios
+3. **Core Simulation Engine** (`/lib/depinSimulation.ts` - 550+ lines): Full TypeScript port of radCAD model including:
+   - Seeded RNG with Poisson, lognormal, normal, uniform distributions
+   - Demand generation for 4 scenarios (consistent, growth, high_to_decay, volatile)
+   - Provider dynamics (onboarding, exits, capacity/cost distributions)
+   - Protocol service & token flows (mint/burn mechanics, reward distribution)
+   - Pricing mechanisms (service price elasticity, token price response to flows)
+   - Macro dynamics (bullish/bearish/sideways drift)
+   - Complete simulation runner with deterministic seeding
+4. **Aggregation & Validation** (`/lib/depinAggregation.ts` - 340 lines): Statistical aggregation (mean/std/percentiles), config validation, histogram generation, warning detection
+5. **Next Steps**: UI page, 6 standard charts, advanced visualizations, integration with Token Design Toolkit
+
+### Completed: Tab 3: Staking Program Designer
+(Previous updates below...)
+
+### Tab 3: Staking Program Designer
+1. **Complete Type System** (`/types/staking.ts`): 327 lines defining all staking models, 5 archetypes (Consensus L1/L2, DeFi, Liquid Staking, Restaking, veGovernance), price scenarios, rewards sources, staking mechanics, demand models, and risk assumptions
+2. **Computation Engine** (`/lib/stakingEngine.ts`): 417 lines of staking dynamics simulation including:
+   - Dynamic staking ratio calculation using sigmoid demand elasticity curve
+   - Price scenario modeling (flat, bull/base/bear, custom series)
+   - Multi-source rewards (inflation, fees, other streams)
+   - Net APR with operator commission, risk penalties, lockup costs
+   - LST/Restaking/veGovernance cohort yield calculations
+   - Stress test scenarios (rate hike, fee drawdown, price crash, slash event)
+3. **6 Production-Ready Presets**: L1 PoS Conservative, L1 PoS Aggressive, DeFi Emissions Farm, App Bond Required, Liquid Staking Enabled, veTokenomics
+4. **Comprehensive UI** (`/components/StakingTab.tsx`): Full input/output interface with:
+   - Archetype selector with hybrid mode toggle
+   - Preset loader with descriptions
+   - Input panels: Token & Supply, Time Config, Rewards (inflation/fees), Staking Mechanics, Demand Model
+   - Advanced settings for risk parameters
+   - KPI cards: Staking Ratio, Avg Net APR, Stake Value, Real Yield %
+   - Charts: Staking Ratio Over Time (actual vs target), Gross vs Net APR
+   - Cohort yields table for LST/Restaking/ve participants
+   - One-click stress tests with alert summaries
+5. **Integration**: Added as third tab in main navigation, seamlessly integrated with existing UI
+
+### Previous: Tab 2: Sell Pressure
 1. **Sell Pressure Types**: Added SellPressureConfig with 4 presets (Not a Seller 0%, Conservative 10-20%, Moderate 20-50%, Aggressive 50-80%)
 2. **SellPressureTable Component**: Interactive table with cost basis input, implied FDV calculation, preset dropdown, and Yes/No toggles matching user's design mockup
 3. **Calculation Engine**: Profit multiplier logic (adjusts sell rate based on ROI: <1x=0.5×, 1-5x=1.0×, 5-20x=1.5×, 20-100x=2.0×, 100x+=3.0×), price-dependent selling (±20% based on price trajectory), per-group sell pressure computation from unlock schedule
@@ -156,4 +196,8 @@ The tool helps token designers, founders, and investors understand token economi
 - Diverging bar charts (positive/negative values) in Recharts require using `<Cell>` component to conditionally color each bar based on data value.
 - Profit-based multipliers make sell pressure more realistic: early investors with 100x returns are 3x more likely to sell than base rate, while those at a loss are 0.5x as likely.
 - Cost basis and implied FDV provide crucial context for sell pressure modeling: $0.001 seed vs $0.10 public sale results in vastly different selling behavior at same token price.
+- Staking demand modeling benefits from yield-spread-to-participation sigmoid curves: enables realistic simulation of how stakers respond to net APR vs opportunity cost.
+- Separating computation engine from UI allows for complex multi-step calculations (price series → rewards → APR → demand target → actual staking ratio) to be pure functions, easily testable and debuggable.
+- Stress tests as one-click buttons with alert outputs provide immediate insights: designers can quickly see impact of rate hikes, fee drawdowns, price crashes without manual parameter tweaking.
+- Cohort modeling (LST, Restaking, ve) adds depth: different participant types with different yield profiles and lockup requirements show the full complexity of modern staking systems.
 
