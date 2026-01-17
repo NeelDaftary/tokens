@@ -38,19 +38,26 @@ class SeededRNG implements DePINRNG {
     return z0 * std + mean;
   }
 
-  // Poisson distribution (Knuth algorithm)
+  // Poisson distribution
   poisson(lambda: number): number {
     if (lambda <= 0) return 0;
+
+    // For large lambda, use Normal approximation rounded to nearest integer
+    if (lambda > 30) {
+      const val = Math.round(this.normal(lambda, Math.sqrt(lambda)));
+      return Math.max(0, val);
+    }
+
     const L = Math.exp(-lambda);
     let k = 0;
     let p = 1;
-    const maxIterations = 1000; // Safety limit
+    const maxIterations = 10000; // Increased safety limit
     do {
       k++;
       p *= this.random();
       if (k > maxIterations) {
-        console.warn(`Poisson exceeded max iterations for lambda=${lambda}`);
-        return k - 1;
+        // Fallback to normal if iteration limit hit (shouldn't happen with lambda check above)
+        return Math.max(0, Math.round(this.normal(lambda, Math.sqrt(lambda))));
       }
     } while (p > L);
     return k - 1;
@@ -182,7 +189,7 @@ function shouldProviderOnboard(
     const potentialRevenue = provider.capacity * potentialRewardRate * tokenPrice;
     return potentialRevenue > provider.cost;
   }
-  
+
   // Normal case: Provider onboards if expected revenue > cost
   const expectedRevenue = provider.capacity * rewardRate * tokenPrice;
   return expectedRevenue > provider.cost;
@@ -219,13 +226,17 @@ function executeProtocolService(
   const { maxMint, percentBurned } = config.protocolParams;
 
   // Tokens bought by users for service
-  const tokensBought = (demand * servicePrice) / tokenPrice;
+  // Cap at circulating supply to prevent unrealistic buy pressure/negative supply in one tick
+  const tokensBought = Math.min((demand * servicePrice) / tokenPrice, state.circulatingSupply);
 
   // Minted tokens (capped at maxMint)
   const mintedTokens = Math.min(tokensBought, maxMint);
 
   // Burned tokens
-  const burnedTokens = tokensBought * percentBurned;
+  // Cannot burn more than what was bought or what exists in supply
+  // (Assuming burn happens from the bought tokens or supply)
+  const maxBurnable = Math.min(tokensBought, state.circulatingSupply + mintedTokens);
+  const burnedTokens = Math.min(tokensBought * percentBurned, maxBurnable);
 
   // Reward rate (tokens per capacity unit)
   // Guard against division by zero
@@ -295,7 +306,7 @@ function updateServicePrice(
   // If demand > capacity, price increases; if capacity > demand, price decreases
   const utilizationRatio = demand / totalCapacity;
   const priceAdjustment = Math.pow(utilizationRatio, servicePriceElasticity);
-  
+
   let newPrice = servicePrice * priceAdjustment;
 
   // Apply bounds
@@ -333,7 +344,7 @@ function updateMacro(
   rng: DePINRNG
 ): number {
   const { macroCondition, macroSensitivity } = config;
-  
+
   let driftRange: { min: number; max: number };
 
   switch (macroCondition) {
@@ -382,8 +393,8 @@ function simulateStep(
   // 4. Onboard new providers
   for (const candidate of candidates) {
     if (shouldProviderOnboard(
-      candidate, 
-      state.rewardRate, 
+      candidate,
+      state.rewardRate,
       state.tokenPrice,
       state.totalCapacity,
       state.mintedTokens
@@ -435,7 +446,8 @@ function simulateStep(
   const tokensSold = tokensSoldByProviders + tokensSoldByExiting;
 
   // 8. Update supply
-  const circulatingSupply = state.circulatingSupply + mintedTokens - burnedTokens;
+  // Ensure supply never goes below 0 (though our checks above should prevent this)
+  const circulatingSupply = Math.max(0, state.circulatingSupply + mintedTokens - burnedTokens);
 
   // 9. Calculate net flow
   const netFlow = tokensBought - tokensSold;
@@ -482,9 +494,9 @@ export function runDePINSimulation(
 ): SimulationResult {
   const startTime = Date.now();
   const seedUsed = params.seed !== undefined ? params.seed : Math.floor(Math.random() * 1000000);
-  
+
   const runs: SimulationRun[] = [];
-  
+
   for (let runId = 0; runId < params.runs; runId++) {
     const runSeed = seedUsed + runId;
     const rng = new SeededRNG(runSeed);
@@ -518,7 +530,7 @@ export function runDePINSimulation(
     for (let t = 1; t <= params.timesteps; t++) {
       state = simulateStep(state, config, t, previousDemand, rng);
       previousDemand = state.demand;
-      
+
       // Store state (keep providers as shallow reference to avoid deep copy issues)
       states.push({
         ...state,
@@ -560,7 +572,7 @@ export function extractMetricTimeSeries(
   metric: keyof SimulationState
 ): SpaghettiData[] {
   const data: SpaghettiData[] = [];
-  
+
   for (const run of runs) {
     for (const state of run.states) {
       const value = state[metric];
@@ -573,7 +585,7 @@ export function extractMetricTimeSeries(
       }
     }
   }
-  
+
   return data;
 }
 

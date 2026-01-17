@@ -19,15 +19,16 @@ import {
 } from "recharts";
 import DemandSourceCard from "@/components/DemandSourceCard";
 import SellPressureTable from "@/components/SellPressureTable";
+import LiquidityTab from "@/components/LiquidityTab";
 import StakingTab from "@/components/StakingTab";
 import SimulatorSidebar from "@/components/SimulatorSidebar";
 import type { DemandSourceConfig, SellPressureConfig } from "@/types/demand";
 import { SELL_PRESSURE_PRESETS } from "@/types/demand";
-import { 
-  computeDemandSeries, 
-  convertToCumulative, 
+import {
+  computeDemandSeries,
+  convertToCumulative,
   computeSellPressureSeries,
-  computeNetPressure 
+  computeNetPressure
 } from "@/lib/demandCalculations";
 
 type DistributionGroup = {
@@ -159,15 +160,15 @@ export default function Home() {
   const [horizonMonths, setHorizonMonths] = useState(36);
   const [pieChartMode, setPieChartMode] = useState<"endState" | "instantaneous">("endState");
   const [selectedMonth, setSelectedMonth] = useState(0);
-  const [activeTab, setActiveTab] = useState<"emissions" | "demand" | "staking">("emissions");
+  const [activeTab, setActiveTab] = useState<"emissions" | "demand" | "liquidity" | "staking">("emissions");
   const [isSimulatorSidebarOpen, setIsSimulatorSidebarOpen] = useState(false);
-  
+
   // Demand tab state
   const [demandHorizonMonths, setDemandHorizonMonths] = useState(36);
   const [demandUnit, setDemandUnit] = useState<"tokens" | "usd">("tokens");
   const [demandViewMode, setDemandViewMode] = useState<"cumulative" | "period">("period");
   const [demandSources, setDemandSources] = useState<DemandSourceConfig[]>([]);
-  
+
   // Sell pressure state
   const [sellPressureConfigs, setSellPressureConfigs] = useState<SellPressureConfig[]>([]);
   const [currentTokenPrice, setCurrentTokenPrice] = useState(1);
@@ -195,16 +196,16 @@ export default function Home() {
       setSellPressureConfigs([]);
       return;
     }
-    
+
     setSellPressureConfigs((prevConfigs) => {
       const newConfigs: SellPressureConfig[] = groups.map((group, idx) => {
         // Try to find existing config for this group
         const existing = prevConfigs.find((c) => c.groupName === group.name);
-        
+
         if (existing) {
           return existing;
         }
-        
+
         // Create new config with defaults
         return {
           groupId: `group-${idx}`,
@@ -219,7 +220,7 @@ export default function Home() {
           usePriceDependent: false,
         };
       });
-      
+
       return newConfigs;
     });
   }, [groups]);
@@ -273,7 +274,7 @@ export default function Home() {
     // Use a simple token price estimate (could be from market cap model later)
     const estimatedPrice = 1; // $1 per token as default
     const rawDemand = computeDemandSeries(demandSources, demandHorizonMonths, supply, estimatedPrice);
-    
+
     // Apply view mode (cumulative or period)
     if (demandViewMode === "cumulative") {
       return {
@@ -284,7 +285,7 @@ export default function Home() {
         totalSeries: convertToCumulative(rawDemand.totalSeries),
       };
     }
-    
+
     return rawDemand;
   }, [demandSources, demandHorizonMonths, totalSupply, unknownSupply, demandViewMode]);
 
@@ -411,7 +412,7 @@ export default function Home() {
         }))
       )
     );
-    
+
     // Load demand data if available
     if (p.demandModel) {
       try {
@@ -424,7 +425,7 @@ export default function Home() {
         console.error("Failed to parse demand model", err);
       }
     }
-    
+
     // Load sell pressure data if available
     if (p.sellPressureModel) {
       try {
@@ -435,7 +436,7 @@ export default function Home() {
         console.error("Failed to parse sell pressure model", err);
       }
     }
-    
+
     setMessage(`Loaded project "${p.name}"`);
   };
 
@@ -446,519 +447,529 @@ export default function Home() {
           <h1 className="text-2xl font-semibold text-white">
             Token Design Toolkit
           </h1>
-          
+
           <div className="flex gap-2 border-b border-neutral-800">
             <button
               onClick={() => setActiveTab("emissions")}
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === "emissions"
-                  ? "border-b-2 border-blue-500 text-white"
-                  : "text-neutral-400 hover:text-neutral-200"
-              }`}
+              className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "emissions"
+                ? "border-b-2 border-blue-500 text-white"
+                : "text-neutral-400 hover:text-neutral-200"
+                }`}
             >
               Distribution & Emissions
             </button>
             <button
               onClick={() => setActiveTab("demand")}
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === "demand"
-                  ? "border-b-2 border-blue-500 text-white"
-                  : "text-neutral-400 hover:text-neutral-200"
-              }`}
+              className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "demand"
+                ? "border-b-2 border-blue-500 text-white"
+                : "text-neutral-400 hover:text-neutral-200"
+                }`}
             >
               Token Demand
             </button>
             <button
-              onClick={() => setActiveTab("staking")}
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === "staking"
-                  ? "border-b-2 border-blue-500 text-white"
-                  : "text-neutral-400 hover:text-neutral-200"
-              }`}
+              onClick={() => setActiveTab("liquidity")}
+              className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "liquidity"
+                ? "border-b-2 border-blue-500 text-white"
+                : "text-neutral-400 hover:text-neutral-200"
+                }`}
             >
-              Staking
+              Liquidity Planner
             </button>
             <button
-              onClick={() => setIsSimulatorSidebarOpen(true)}
-              className="ml-auto flex items-center gap-2 rounded border border-blue-600 bg-blue-600/10 px-4 py-2 text-sm font-medium text-blue-400 transition-colors hover:bg-blue-600/20"
+              onClick={() => setActiveTab("staking")}
+              className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "staking"
+                ? "border-b-2 border-blue-500 text-white"
+                : "text-neutral-400 hover:text-neutral-200"
+                }`}
             >
-              <span>⚡</span>
-              Simulators
+              Staking
             </button>
           </div>
         </header>
 
+        {activeTab === "liquidity" && (
+          <LiquidityTab
+            initialLaunchMarketCap={undefined} // Could link to Valuation tab if it existed
+            initialCirculatingSupply={
+              unlocks.totalSeries[0]?.cumulative // TGE circulating
+            }
+            initialFloatPct={
+              totalSupply
+                ? ((unlocks.totalSeries[0]?.cumulative || 0) / totalSupply) * 100
+                : undefined
+            }
+          />
+        )}
+
         {activeTab === "emissions" && (
-        <>
-        <section className="grid gap-6 md:grid-cols-3">
-          <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
-            <h2 className="text-sm font-semibold text-white">Project</h2>
-            <div className="mt-3 flex flex-col gap-3 text-sm">
-              <label className="flex flex-col gap-1">
-                <span className="text-neutral-200">Name</span>
-                <input
-                  className="rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="text-neutral-200">Token symbol</span>
-                <input
-                  className="rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white"
-                  value={tokenSymbol}
-                  onChange={(e) => setTokenSymbol(e.target.value)}
-                />
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="text-neutral-200">Total supply</span>
-                <input
-                  type="number"
-                  className="rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white"
-                  value={unknownSupply ? "" : totalSupply ?? ""}
-                  onChange={(e) =>
-                    setTotalSupply(
-                      e.target.value === ""
-                        ? null
-                        : parseFloat(e.target.value || "0")
-                    )
-                  }
-                  disabled={unknownSupply}
-                />
-                <label className="mt-1 flex items-center gap-2 text-xs text-neutral-300">
-                  <input
-                    type="checkbox"
-                    checked={unknownSupply}
-                    onChange={(e) => setUnknownSupply(e.target.checked)}
-                  />
-                  Max supply unknown/unbounded (uses placeholder for previews)
-                </label>
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="text-neutral-200">Domain preset</span>
-                <select
-                  className="rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white"
-                  value={domain}
-                  onChange={(e) =>
-                    setDomain(e.target.value as keyof typeof domainPresets)
-                  }
-                >
-                  {Object.keys(domainPresets).map((key) => (
-                    <option key={key} value={key}>
-                      {key}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <button
-                className="rounded bg-blue-600 px-3 py-2 text-white transition hover:bg-blue-500 disabled:bg-neutral-500"
-                onClick={handleNormalize}
-                disabled={groups.length === 0}
-              >
-                Normalize allocations to 100%
-              </button>
-              <button
-                className="rounded border border-neutral-700 px-3 py-2 text-sm text-white transition hover:border-neutral-500"
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? "Saving..." : "Save project"}
-              </button>
-              {message ? (
-                <p className="text-xs text-neutral-200">{message}</p>
-              ) : null}
-              
-              <div className="mt-6 border-t border-neutral-800 pt-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-semibold text-neutral-200">
-                    Saved projects
-                  </h3>
+          <>
+            <section className="grid gap-6 md:grid-cols-4">
+              <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+                <h2 className="text-sm font-semibold text-white">Project</h2>
+                <div className="mt-3 flex flex-col gap-3 text-sm">
+                  <label className="flex flex-col gap-1">
+                    <span className="text-neutral-200">Name</span>
+                    <input
+                      className="rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className="text-neutral-200">Token symbol</span>
+                    <input
+                      className="rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white"
+                      value={tokenSymbol}
+                      onChange={(e) => setTokenSymbol(e.target.value)}
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className="text-neutral-200">Total supply</span>
+                    <input
+                      type="text"
+                      className="rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white"
+                      value={
+                        unknownSupply
+                          ? ""
+                          : totalSupply
+                            ? totalSupply.toLocaleString("en-US", { maximumFractionDigits: 0 })
+                            : ""
+                      }
+                      onChange={(e) => {
+                        const cleaned = e.target.value.replace(/,/g, "");
+                        setTotalSupply(
+                          cleaned === "" ? null : parseFloat(cleaned) || null
+                        );
+                      }}
+                      disabled={unknownSupply}
+                    />
+                    <label className="mt-1 flex items-center gap-2 text-xs text-neutral-300">
+                      <input
+                        type="checkbox"
+                        checked={unknownSupply}
+                        onChange={(e) => setUnknownSupply(e.target.checked)}
+                      />
+                      Max supply unknown/unbounded
+                    </label>
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className="text-neutral-200">Domain preset</span>
+                    <select
+                      className="rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white"
+                      value={domain}
+                      onChange={(e) =>
+                        setDomain(e.target.value as keyof typeof domainPresets)
+                      }
+                    >
+                      {Object.keys(domainPresets).map((key) => (
+                        <option key={key} value={key}>
+                          {key}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                   <button
-                    className="text-[11px] text-neutral-300 underline"
-                    onClick={fetchProjects}
-                    disabled={loadingList}
+                    className="rounded bg-blue-600 px-3 py-2 text-white transition hover:bg-blue-500 disabled:bg-neutral-500"
+                    onClick={handleNormalize}
+                    disabled={groups.length === 0}
                   >
-                    {loadingList ? "Refreshing..." : "Refresh"}
+                    Normalize allocations
                   </button>
-                </div>
-                <div className="mt-2 space-y-2 text-xs text-neutral-200">
-                  {savedProjects.length === 0 ? (
-                    <p className="text-neutral-500">None yet.</p>
-                  ) : (
-                    savedProjects.map((p) => (
-                      <div
-                        key={p.id}
-                        className="flex items-center justify-between rounded border border-neutral-800 bg-neutral-950 px-2 py-2"
+                  <button
+                    className="rounded border border-neutral-700 px-3 py-2 text-sm text-white transition hover:border-neutral-500"
+                    onClick={handleSave}
+                    disabled={saving}
+                  >
+                    {saving ? "Saving..." : "Save project"}
+                  </button>
+                  {message ? (
+                    <p className="text-xs text-neutral-200">{message}</p>
+                  ) : null}
+
+                  <div className="mt-6 border-t border-neutral-800 pt-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs font-semibold text-neutral-200">
+                        Saved projects
+                      </h3>
+                      <button
+                        className="text-[11px] text-neutral-300 underline"
+                        onClick={fetchProjects}
+                        disabled={loadingList}
                       >
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-white">
-                            {p.name}
-                          </span>
-                          <span className="text-[11px] text-neutral-400">
-                            {p.domain} · {p.tokenSymbol}
-                          </span>
-                        </div>
-                        <button
-                          className="rounded border border-neutral-700 px-2 py-1 text-[11px] text-white"
-                          onClick={() => handleLoadProject(p)}
-                        >
-                          Load
-                        </button>
-                      </div>
-                    ))
+                        {loadingList ? "Refreshing..." : "Refresh"}
+                      </button>
+                    </div>
+                    <div className="mt-2 space-y-2 text-xs text-neutral-200">
+                      {savedProjects.length === 0 ? (
+                        <p className="text-neutral-500">None yet.</p>
+                      ) : (
+                        savedProjects.map((p) => (
+                          <div
+                            key={p.id}
+                            className="flex items-center justify-between rounded border border-neutral-800 bg-neutral-950 px-2 py-2"
+                          >
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-white">
+                                {p.name}
+                              </span>
+                              <span className="text-[11px] text-neutral-400">
+                                {p.domain} · {p.tokenSymbol}
+                              </span>
+                            </div>
+                            <button
+                              className="rounded border border-neutral-700 px-2 py-1 text-[11px] text-white"
+                              onClick={() => handleLoadProject(p)}
+                            >
+                              Load
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm md:col-span-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-white">
+                    Distribution groups
+                  </h2>
+                  {totalError ? (
+                    <span className="text-xs font-medium text-red-400">
+                      Allocations must total 100% (current: {stats.total.toFixed(2)}
+                      %)
+                    </span>
+                  ) : (
+                    <span className="text-xs text-green-400">
+                      Allocations sum to 100%
+                    </span>
                   )}
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm md:col-span-2">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-white">
-                Distribution groups
-              </h2>
-              {totalError ? (
-                <span className="text-xs font-medium text-red-400">
-                  Allocations must total 100% (current: {stats.total.toFixed(2)}
-                  %)
-                </span>
-              ) : (
-                <span className="text-xs text-green-400">
-                  Allocations sum to 100%
-                </span>
-              )}
-            </div>
-            <div className="mt-2 flex items-center justify-between text-xs text-neutral-200">
-              <button
-                className="rounded border border-neutral-700 px-3 py-1 text-white"
-                onClick={() =>
-                  setGroups((prev) => [
-                    ...prev,
-                    {
-                      name: "New Group",
-                      allocationPct: 5,
-                      type: "EXTERNAL",
-                      category: categoriesPreset[0] || "Uncategorized",
-                      tgeUnlockPct: 0,
-                      cliffMonths: 0,
-                      vestMonths: 12,
-                      unlockFrequency: "MONTHLY",
-                      startMonth: 0,
-                      sellPreset: "CONSERVATIVE",
-                      includeInSellPressure: true,
-                    },
-                  ])
-                }
-              >
-                + Add group
-              </button>
-              <span className="text-neutral-400">
-                Edit rows; delete via “✕”.
-              </span>
-            </div>
-            <div className="mt-3 overflow-x-auto">
-              <table className="min-w-full text-left text-xs text-white">
-                <thead>
-                  <tr className="border-b border-neutral-800 text-neutral-300">
-                    <th className="px-2 py-2">Actions</th>
-                    <th className="px-2 py-2">Name</th>
-                    <th className="px-2 py-2">Alloc %</th>
-                    <th className="px-2 py-2">Type</th>
-                    <th className="px-2 py-2">Category</th>
-                    <th className="px-2 py-2">Color</th>
-                    <th className="px-2 py-2">TGE %</th>
-                    <th className="px-2 py-2">Cliff</th>
-                    <th className="px-2 py-2">Vest (mo)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {groups.map((g, i) => (
-                    <tr key={i} className="border-b border-neutral-800">
-                      <td className="px-2 py-2">
-                        <button
-                          className="text-red-400"
-                          onClick={() =>
-                            setGroups((prev) => prev.filter((_, idx) => idx !== i))
-                          }
-                        >
-                          ✕
-                        </button>
-                      </td>
-                      <td className="px-2 py-2">
-                        <input
-                          className="w-32 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
-                          value={g.name}
-                          onChange={(e) =>
-                            handleUpdateGroup(i, "name", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td className="px-2 py-2">
-                        <input
-                          type="number"
-                          className="w-20 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
-                          value={g.allocationPct}
-                          onChange={(e) =>
-                            handleUpdateGroup(
-                              i,
-                              "allocationPct",
-                              parseFloat(e.target.value)
-                            )
-                          }
-                        />
-                      </td>
-                      <td className="px-2 py-2">
-                        <select
-                          className="rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
-                          value={g.type}
-                          onChange={(e) =>
-                            handleUpdateGroup(i, "type", e.target.value)
-                          }
-                        >
-                          <option value="INTERNAL">INTERNAL</option>
-                          <option value="EXTERNAL">EXTERNAL</option>
-                        </select>
-                      </td>
-                      <td className="px-2 py-2">
-                        <select
-                          className="rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
-                          value={g.category}
-                          onChange={(e) =>
-                            handleUpdateGroup(i, "category", e.target.value)
-                          }
-                        >
-                          {categoriesPreset.map((cat) => (
-                            <option key={cat} value={cat}>
-                              {cat}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="px-2 py-2">
-                        <input
-                          type="color"
-                          className="h-8 w-12 rounded border border-neutral-800 bg-neutral-950"
-                          value={g.color || COLORS[i % COLORS.length]}
-                          onChange={(e) =>
-                            handleUpdateGroup(i, "color", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td className="px-2 py-2">
-                        <input
-                          type="number"
-                          className="w-20 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
-                          value={g.tgeUnlockPct ?? 0}
-                          onChange={(e) =>
-                            handleUpdateGroup(
-                              i,
-                              "tgeUnlockPct",
-                              parseFloat(e.target.value)
-                            )
-                          }
-                        />
-                      </td>
-                      <td className="px-2 py-2">
-                        <input
-                          type="number"
-                          className="w-16 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
-                          value={g.cliffMonths ?? 0}
-                          onChange={(e) =>
-                            handleUpdateGroup(
-                              i,
-                              "cliffMonths",
-                              parseInt(e.target.value || "0", 10)
-                            )
-                          }
-                        />
-                      </td>
-                      <td className="px-2 py-2">
-                        <input
-                          type="number"
-                          className="w-16 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
-                          value={g.vestMonths ?? 0}
-                          onChange={(e) =>
-                            handleUpdateGroup(
-                              i,
-                              "vestMonths",
-                              parseInt(e.target.value || "0", 10)
-                            )
-                          }
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <h2 className="text-sm font-semibold text-white">Distribution Over time</h2>
-            <div className="flex items-center gap-4">
-              <label className="flex items-center gap-2 text-xs text-neutral-200">
-                <span>Months:</span>
-                <input
-                  type="number"
-                  min="12"
-                  max="120"
-                  className="w-20 rounded border border-neutral-700 bg-neutral-950 px-2 py-1 text-white"
-                  value={horizonMonths}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value || "36", 10);
-                    setHorizonMonths(Math.max(12, Math.min(120, val)));
-                    if (selectedMonth > val) setSelectedMonth(val);
-                  }}
-                />
-              </label>
-            </div>
-          </div>
-          
-          <div className="mt-3 flex flex-wrap gap-3 text-xs">
-            {groups.map((g, idx) => (
-              <div
-                key={g.name}
-                className="flex items-center gap-2 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-neutral-200"
-              >
-                <span
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: g.color || COLORS[idx % COLORS.length] }}
-                />
-                <span className="text-[11px]">{g.name}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-4 grid gap-4 lg:grid-cols-1">
-            <div className="h-[24rem] rounded border border-neutral-800 bg-neutral-950 p-4">
-              <div className="flex items-center justify-between">
-                <div className="text-xs font-semibold text-neutral-200">
-                  Distribution (pie)
-                </div>
-                <button
-                  className={`rounded px-2 py-1 text-[10px] transition ${
-                    pieChartMode === "instantaneous"
-                      ? "bg-blue-600 text-white"
-                      : "border border-neutral-700 text-neutral-300"
-                  }`}
-                  onClick={() =>
-                    setPieChartMode((prev) =>
-                      prev === "endState" ? "instantaneous" : "endState"
-                    )
-                  }
-                >
-                  {pieChartMode === "endState" ? "End State" : "Instantaneous"}
-                </button>
-              </div>
-              
-              {pieChartMode === "instantaneous" && (
-                <div className="mt-2 flex flex-col gap-1">
-                  <label className="text-[10px] text-neutral-400">
-                    Month: {selectedMonth}
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max={horizonMonths}
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(parseInt(e.target.value, 10))}
-                    className="w-full"
-                  />
-                </div>
-              )}
-              
-              <ResponsiveContainer width="100%" height={pieChartMode === "instantaneous" ? 290 : 350}>
-                <PieChart>
-                  <Pie
-                    data={pieChartMode === "endState" ? groups : instantaneousDistribution}
-                    dataKey="allocationPct"
-                    nameKey="name"
-                    innerRadius={60}
-                    outerRadius={100}
-                    label={(entry: any) => 
-                      pieChartMode === "endState" 
-                        ? `${entry.allocationPct?.toFixed(2)}%` 
-                        : entry.name
+                <div className="mt-2 flex items-center justify-between text-xs text-neutral-200">
+                  <button
+                    className="rounded border border-neutral-700 px-3 py-1 text-white"
+                    onClick={() =>
+                      setGroups((prev) => [
+                        ...prev,
+                        {
+                          name: "New Group",
+                          allocationPct: 5,
+                          type: "EXTERNAL",
+                          category: categoriesPreset[0] || "Uncategorized",
+                          tgeUnlockPct: 0,
+                          cliffMonths: 0,
+                          vestMonths: 12,
+                          unlockFrequency: "MONTHLY",
+                          startMonth: 0,
+                          sellPreset: "CONSERVATIVE",
+                          includeInSellPressure: true,
+                        },
+                      ])
                     }
-                    labelLine={true}
                   >
-                    {(pieChartMode === "endState" ? groups : instantaneousDistribution).map((g, idx) => (
-                      <Cell
-                        key={g.name}
-                        fill={g.color || COLORS[idx % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    formatter={(value: number | undefined) => value ? `${value.toFixed(2)}%` : ''}
-                    contentStyle={{ 
-                      backgroundColor: '#1f2937', 
-                      border: '1px solid #374151', 
-                      borderRadius: '4px',
-                      color: '#f3f4f6'
-                    }}
-                    labelStyle={{ color: '#f3f4f6' }}
-                    itemStyle={{ color: '#f3f4f6' }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="h-[28rem] rounded border border-neutral-800 bg-neutral-950 p-4">
-              <div className="text-xs font-semibold text-neutral-200">
-                Unlocks over time (stacked cumulative, {horizonMonths} months)
+                    + Add group
+                  </button>
+                  <span className="text-neutral-400">
+                    Edit rows; delete via “✕”.
+                  </span>
+                </div>
+                <div className="mt-3 overflow-x-auto">
+                  <table className="min-w-full text-left text-xs text-white">
+                    <thead>
+                      <tr className="border-b border-neutral-800 text-neutral-300">
+                        <th className="px-2 py-2">Actions</th>
+                        <th className="px-2 py-2">Name</th>
+                        <th className="px-2 py-2">Alloc %</th>
+                        <th className="px-2 py-2">Category</th>
+                        <th className="px-2 py-2">Color</th>
+                        <th className="px-2 py-2">TGE %</th>
+                        <th className="px-2 py-2">Cliff</th>
+                        <th className="px-2 py-2">Vest (mo)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {groups.map((g, i) => (
+                        <tr key={i} className="border-b border-neutral-800">
+                          <td className="px-2 py-2">
+                            <button
+                              className="text-red-400"
+                              onClick={() =>
+                                setGroups((prev) => prev.filter((_, idx) => idx !== i))
+                              }
+                            >
+                              ✕
+                            </button>
+                          </td>
+                          <td className="px-2 py-2">
+                            <input
+                              className="w-32 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
+                              value={g.name}
+                              onChange={(e) =>
+                                handleUpdateGroup(i, "name", e.target.value)
+                              }
+                            />
+                          </td>
+                          <td className="px-2 py-2">
+                            <input
+                              type="number"
+                              className="w-20 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
+                              value={g.allocationPct}
+                              onChange={(e) =>
+                                handleUpdateGroup(
+                                  i,
+                                  "allocationPct",
+                                  parseFloat(e.target.value)
+                                )
+                              }
+                            />
+                          </td>
+                          <td className="px-2 py-2">
+                            <select
+                              className="rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
+                              value={g.category}
+                              onChange={(e) =>
+                                handleUpdateGroup(i, "category", e.target.value)
+                              }
+                            >
+                              {categoriesPreset.map((cat) => (
+                                <option key={cat} value={cat}>
+                                  {cat}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="px-2 py-2">
+                            <input
+                              type="color"
+                              className="h-8 w-12 rounded border border-neutral-800 bg-neutral-950"
+                              value={g.color || COLORS[i % COLORS.length]}
+                              onChange={(e) =>
+                                handleUpdateGroup(i, "color", e.target.value)
+                              }
+                            />
+                          </td>
+                          <td className="px-2 py-2">
+                            <input
+                              type="number"
+                              className="w-14 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
+                              value={g.tgeUnlockPct ?? 0}
+                              onChange={(e) =>
+                                handleUpdateGroup(
+                                  i,
+                                  "tgeUnlockPct",
+                                  parseFloat(e.target.value)
+                                )
+                              }
+                            />
+                          </td>
+                          <td className="px-2 py-2">
+                            <input
+                              type="number"
+                              className="w-12 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
+                              value={g.cliffMonths ?? 0}
+                              onChange={(e) =>
+                                handleUpdateGroup(
+                                  i,
+                                  "cliffMonths",
+                                  parseInt(e.target.value || "0", 10)
+                                )
+                              }
+                            />
+                          </td>
+                          <td className="px-2 py-2">
+                            <input
+                              type="number"
+                              className="w-12 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
+                              value={g.vestMonths ?? 0}
+                              onChange={(e) =>
+                                handleUpdateGroup(
+                                  i,
+                                  "vestMonths",
+                                  parseInt(e.target.value || "0", 10)
+                                )
+                              }
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-              <ResponsiveContainer width="100%" height={410}>
-                <BarChart
-                  data={unlocks.totalSeries.slice(0, horizonMonths + 1).map((row, idx) => {
-                    const obj: Record<string, number | string> = {
-                      month: `M${idx}`,
-                    };
-                    groups.forEach((g) => {
-                      const found = unlocks.byGroup.find(
-                        (bg) => bg.name === g.name
-                      );
-                      obj[g.name] = found?.series[idx]?.cumulative ?? 0;
-                    });
-                    return obj;
-                  })}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                  <XAxis 
-                    dataKey="month" 
-                    stroke="#9ca3af" 
-                    tick={{ fill: '#9ca3af', fontSize: 11 }}
-                  />
-                  <YAxis 
-                    stroke="#9ca3af"
-                    tick={{ fill: '#9ca3af', fontSize: 11 }}
-                    tickFormatter={(value) => {
-                      if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(1)}B`;
-                      if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-                      if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
-                      return value.toString();
-                    }}
-                  />
-                  <Tooltip 
-                    formatter={(value: number | undefined) => value ? fmt(value) : ''}
-                    contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '4px' }}
-                    labelStyle={{ color: '#d1d5db' }}
-                  />
-                  {groups.map((g, idx) => (
-                    <Bar
-                      key={g.name}
-                      dataKey={g.name}
-                      stackId="a"
-                      fill={g.color || COLORS[idx % COLORS.length]}
+            </section>
+
+            <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <h2 className="text-sm font-semibold text-white">Distribution Over time</h2>
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2 text-xs text-neutral-200">
+                    <span>Months:</span>
+                    <input
+                      type="number"
+                      min="12"
+                      max="120"
+                      className="w-20 rounded border border-neutral-700 bg-neutral-950 px-2 py-1 text-white"
+                      value={horizonMonths}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value || "36", 10);
+                        setHorizonMonths(Math.max(12, Math.min(120, val)));
+                        if (selectedMonth > val) setSelectedMonth(val);
+                      }}
                     />
-                  ))}
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-        </div>
-        </section>
-        </>
+                  </label>
+                </div>
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-3 text-xs">
+                {groups.map((g, idx) => (
+                  <div
+                    key={g.name}
+                    className="flex items-center gap-2 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-neutral-200"
+                  >
+                    <span
+                      className="h-3 w-3 rounded-full"
+                      style={{ backgroundColor: g.color || COLORS[idx % COLORS.length] }}
+                    />
+                    <span className="text-[11px]">{g.name}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 grid gap-4 lg:grid-cols-1">
+                <div className="h-[24rem] rounded border border-neutral-800 bg-neutral-950 p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs font-semibold text-neutral-200">
+                      Distribution (pie)
+                    </div>
+                    <button
+                      className={`rounded px-2 py-1 text-[10px] transition ${pieChartMode === "instantaneous"
+                        ? "bg-blue-600 text-white"
+                        : "border border-neutral-700 text-neutral-300"
+                        }`}
+                      onClick={() =>
+                        setPieChartMode((prev) =>
+                          prev === "endState" ? "instantaneous" : "endState"
+                        )
+                      }
+                    >
+                      {pieChartMode === "endState" ? "End State" : "Instantaneous"}
+                    </button>
+                  </div>
+
+                  {pieChartMode === "instantaneous" && (
+                    <div className="mt-2 flex flex-col gap-1">
+                      <label className="text-[10px] text-neutral-400">
+                        Month: {selectedMonth}
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max={horizonMonths}
+                        value={selectedMonth}
+                        onChange={(e) => setSelectedMonth(parseInt(e.target.value, 10))}
+                        className="w-full"
+                      />
+                    </div>
+                  )}
+
+                  <ResponsiveContainer width="100%" height={pieChartMode === "instantaneous" ? 290 : 350}>
+                    <PieChart>
+                      <Pie
+                        data={pieChartMode === "endState" ? groups : instantaneousDistribution}
+                        dataKey="allocationPct"
+                        nameKey="name"
+                        innerRadius={60}
+                        outerRadius={100}
+                        label={(entry: any) =>
+                          pieChartMode === "endState"
+                            ? `${entry.allocationPct?.toFixed(2)}%`
+                            : entry.name
+                        }
+                        labelLine={true}
+                      >
+                        {(pieChartMode === "endState" ? groups : instantaneousDistribution).map((g, idx) => (
+                          <Cell
+                            key={g.name}
+                            fill={g.color || COLORS[idx % COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        formatter={(value: number | undefined, name: string | undefined) => {
+                          if (value === undefined) return '';
+                          return [`${value.toFixed(2)}%`, name || ''];
+                        }}
+                        contentStyle={{
+                          backgroundColor: '#1f2937',
+                          border: '1px solid #374151',
+                          borderRadius: '4px',
+                          color: '#f3f4f6'
+                        }}
+                        labelStyle={{ color: '#f3f4f6' }}
+                        itemStyle={{ color: '#f3f4f6' }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="h-[28rem] rounded border border-neutral-800 bg-neutral-950 p-4">
+                  <div className="text-xs font-semibold text-neutral-200">
+                    Unlocks over time (stacked cumulative, {horizonMonths} months)
+                  </div>
+                  <ResponsiveContainer width="100%" height={410}>
+                    <BarChart
+                      data={unlocks.totalSeries.slice(0, horizonMonths + 1).map((row, idx) => {
+                        const obj: Record<string, number | string> = {
+                          month: `M${idx}`,
+                        };
+                        groups.forEach((g) => {
+                          const found = unlocks.byGroup.find(
+                            (bg) => bg.name === g.name
+                          );
+                          obj[g.name] = found?.series[idx]?.cumulative ?? 0;
+                        });
+                        return obj;
+                      })}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                      <XAxis
+                        dataKey="month"
+                        stroke="#9ca3af"
+                        tick={{ fill: '#9ca3af', fontSize: 11 }}
+                      />
+                      <YAxis
+                        stroke="#9ca3af"
+                        tick={{ fill: '#9ca3af', fontSize: 11 }}
+                        tickFormatter={(value) => {
+                          if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(1)}B`;
+                          if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+                          if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
+                          return value.toString();
+                        }}
+                      />
+                      <Tooltip
+                        formatter={(value: number | undefined, name: string | undefined) => {
+                          if (value === undefined) return '';
+                          return [fmt(value), name || ''];
+                        }}
+                        contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '4px' }}
+                        labelStyle={{ color: '#d1d5db' }}
+                      />
+                      {groups.map((g, idx) => (
+                        <Bar
+                          key={g.name}
+                          dataKey={g.name}
+                          stackId="a"
+                          fill={g.color || COLORS[idx % COLORS.length]}
+                        />
+                      ))}
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </section>
+          </>
         )}
 
         {activeTab === "demand" && (
@@ -984,21 +995,19 @@ export default function Home() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => setDemandUnit("tokens")}
-                      className={`rounded px-3 py-1 text-xs font-medium transition ${
-                        demandUnit === "tokens"
-                          ? "bg-blue-600 text-white"
-                          : "border border-neutral-700 text-neutral-300 hover:text-white"
-                      }`}
+                      className={`rounded px-3 py-1 text-xs font-medium transition ${demandUnit === "tokens"
+                        ? "bg-blue-600 text-white"
+                        : "border border-neutral-700 text-neutral-300 hover:text-white"
+                        }`}
                     >
                       Tokens
                     </button>
                     <button
                       onClick={() => setDemandUnit("usd")}
-                      className={`rounded px-3 py-1 text-xs font-medium transition ${
-                        demandUnit === "usd"
-                          ? "bg-blue-600 text-white"
-                          : "border border-neutral-700 text-neutral-300 hover:text-white"
-                      }`}
+                      className={`rounded px-3 py-1 text-xs font-medium transition ${demandUnit === "usd"
+                        ? "bg-blue-600 text-white"
+                        : "border border-neutral-700 text-neutral-300 hover:text-white"
+                        }`}
                     >
                       USD
                     </button>
@@ -1006,21 +1015,19 @@ export default function Home() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => setDemandViewMode("period")}
-                      className={`rounded px-3 py-1 text-xs font-medium transition ${
-                        demandViewMode === "period"
-                          ? "bg-blue-600 text-white"
-                          : "border border-neutral-700 text-neutral-300 hover:text-white"
-                      }`}
+                      className={`rounded px-3 py-1 text-xs font-medium transition ${demandViewMode === "period"
+                        ? "bg-blue-600 text-white"
+                        : "border border-neutral-700 text-neutral-300 hover:text-white"
+                        }`}
                     >
                       Per-Period
                     </button>
                     <button
                       onClick={() => setDemandViewMode("cumulative")}
-                      className={`rounded px-3 py-1 text-xs font-medium transition ${
-                        demandViewMode === "cumulative"
-                          ? "bg-blue-600 text-white"
-                          : "border border-neutral-700 text-neutral-300 hover:text-white"
-                      }`}
+                      className={`rounded px-3 py-1 text-xs font-medium transition ${demandViewMode === "cumulative"
+                        ? "bg-blue-600 text-white"
+                        : "border border-neutral-700 text-neutral-300 hover:text-white"
+                        }`}
                     >
                       Cumulative
                     </button>
@@ -1100,12 +1107,12 @@ export default function Home() {
                         })}
                       >
                         <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                        <XAxis 
-                          dataKey="month" 
-                          stroke="#9ca3af" 
+                        <XAxis
+                          dataKey="month"
+                          stroke="#9ca3af"
                           tick={{ fill: '#9ca3af', fontSize: 11 }}
                         />
-                        <YAxis 
+                        <YAxis
                           stroke="#9ca3af"
                           tick={{ fill: '#9ca3af', fontSize: 11 }}
                           tickFormatter={(value) => {
@@ -1115,8 +1122,11 @@ export default function Home() {
                             return value.toString();
                           }}
                         />
-                        <Tooltip 
-                          formatter={(value: number | undefined) => value ? fmt(value) : ''}
+                        <Tooltip
+                          formatter={(value: number | undefined, name: string | undefined) => {
+                            if (value === undefined) return '';
+                            return [fmt(value), name || ''];
+                          }}
                           contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '4px' }}
                           labelStyle={{ color: '#d1d5db' }}
                         />
@@ -1138,7 +1148,7 @@ export default function Home() {
                       <div>
                         <div className="text-[11px] uppercase text-neutral-500">Total Demand</div>
                         <div className="font-semibold">
-                          {demandUnit === "tokens" 
+                          {demandUnit === "tokens"
                             ? fmt(demandData.totalSeries[demandHorizonMonths]?.tokens || 0)
                             : `$${fmt(demandData.totalSeries[demandHorizonMonths]?.usd || 0)}`}
                         </div>
@@ -1255,12 +1265,12 @@ export default function Home() {
                           })}
                         >
                           <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                          <XAxis 
-                            dataKey="month" 
-                            stroke="#9ca3af" 
+                          <XAxis
+                            dataKey="month"
+                            stroke="#9ca3af"
                             tick={{ fill: '#9ca3af', fontSize: 11 }}
                           />
-                          <YAxis 
+                          <YAxis
                             stroke="#9ca3af"
                             tick={{ fill: '#9ca3af', fontSize: 11 }}
                             tickFormatter={(value) => {
@@ -1270,8 +1280,11 @@ export default function Home() {
                               return value.toString();
                             }}
                           />
-                          <Tooltip 
-                            formatter={(value: number | undefined) => value ? fmt(value) : ''}
+                          <Tooltip
+                            formatter={(value: number | undefined, name: string | undefined) => {
+                              if (value === undefined) return '';
+                              return [fmt(value), name || ''];
+                            }}
                             contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '4px' }}
                             labelStyle={{ color: '#d1d5db' }}
                           />
@@ -1314,12 +1327,12 @@ export default function Home() {
                           }))}
                         >
                           <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                          <XAxis 
-                            dataKey="month" 
-                            stroke="#9ca3af" 
+                          <XAxis
+                            dataKey="month"
+                            stroke="#9ca3af"
                             tick={{ fill: '#9ca3af', fontSize: 11 }}
                           />
-                          <YAxis 
+                          <YAxis
                             stroke="#9ca3af"
                             tick={{ fill: '#9ca3af', fontSize: 11 }}
                             tickFormatter={(value) => {
@@ -1330,7 +1343,7 @@ export default function Home() {
                               return value.toString();
                             }}
                           />
-                          <Tooltip 
+                          <Tooltip
                             formatter={(value: number | undefined, name: string | undefined) => {
                               if (value === undefined) return '';
                               const label = name === 'net' ? 'Net Pressure' : name === 'demand' ? 'Total Demand' : 'Total Sell';
@@ -1343,9 +1356,9 @@ export default function Home() {
                             dataKey="net"
                           >
                             {netPressureData.series.slice(0, demandHorizonMonths + 1).map((entry, index) => (
-                              <Cell 
-                                key={`cell-${index}`} 
-                                fill={entry.net >= 0 ? 'hsl(120, 60%, 45%)' : 'hsl(0, 65%, 50%)'} 
+                              <Cell
+                                key={`cell-${index}`}
+                                fill={entry.net >= 0 ? 'hsl(120, 60%, 45%)' : 'hsl(0, 65%, 50%)'}
                               />
                             ))}
                           </Bar>
@@ -1365,8 +1378,8 @@ export default function Home() {
                         <div>
                           <div className="text-[11px] uppercase text-neutral-500">Demand/Sell Ratio</div>
                           <div className="font-semibold">
-                            {netPressureData.metadata.demandSellRatio === Infinity 
-                              ? '∞' 
+                            {netPressureData.metadata.demandSellRatio === Infinity
+                              ? '∞'
                               : netPressureData.metadata.demandSellRatio.toFixed(2)}x
                           </div>
                         </div>
@@ -1385,8 +1398,8 @@ export default function Home() {
                         <div>
                           <div className="text-[11px] uppercase text-neutral-500">Equilibrium</div>
                           <div className="font-semibold">
-                            {netPressureData.metadata.equilibriumMonth !== null 
-                              ? `Month ${netPressureData.metadata.equilibriumMonth}` 
+                            {netPressureData.metadata.equilibriumMonth !== null
+                              ? `Month ${netPressureData.metadata.equilibriumMonth}`
                               : 'Not reached'}
                           </div>
                         </div>
@@ -1402,7 +1415,7 @@ export default function Home() {
               <h2 className="text-sm font-semibold text-white mb-4">
                 Market Dynamics Summary
               </h2>
-              
+
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {/* Total Demand Card */}
                 <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
@@ -1494,15 +1507,26 @@ export default function Home() {
                   </div>
                   <div className="text-[10px] text-neutral-500 mt-1">market health indicator</div>
                 </div>
-        </div>
+              </div>
             </section>
           </>
         )}
+
+
 
         {activeTab === "staking" && (
           <StakingTab />
         )}
       </main>
+
+      {/* Vertical Simulator Button - Fixed Right Edge */}
+      <button
+        onClick={() => setIsSimulatorSidebarOpen(true)}
+        className="fixed right-0 top-1/2 -translate-y-1/2 rotate-90 origin-center rounded-t-lg border border-blue-600 bg-blue-600/10 px-6 py-3 text-sm font-medium text-blue-400 shadow-lg transition-all hover:bg-blue-600/20 hover:shadow-xl"
+        style={{ transformOrigin: 'center center' }}
+      >
+        Simulators
+      </button>
 
       {/* Simulator Sidebar */}
       <SimulatorSidebar

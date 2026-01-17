@@ -75,3 +75,291 @@
 - Comprehensive presets for quick starts
 - Full data persistence across all features
 
+---
+
+## Design System & Aesthetic Guidelines
+
+**Philosophy:** Premium, professional, depth-focused design inspired by Vercel Dashboard and Linear App. Every component should feel intentional, polished, and functional—designed by a 150 IQ designer, not an engineer.
+
+### Color Palette - "Midnight Theme"
+
+**Backgrounds:**
+```
+Primary:   #0A0A0F  (deepest, main background)
+Surface:   #13131A  (cards, sections, elevated surfaces)
+Elevated:  #1F1F28  (hover states, active elements)
+```
+
+**Borders:**
+```
+Subtle:  rgba(255, 255, 255, 0.05)  (default borders)
+Medium:  rgba(255, 255, 255, 0.10)  (focused/hover borders)
+Strong:  rgba(255, 255, 255, 0.20)  (emphasized borders)
+```
+
+**Text:**
+```
+Primary:    #E5E5E7  (main text, high contrast)
+Secondary:  #8B8B96  (descriptions, labels, muted)
+Tertiary:   #6B6B76  (disabled, very subtle)
+```
+
+**Accent Colors:**
+```
+Primary:   #3B82F6 → #6366F1  (blue to indigo gradient)
+Success:   #10B981  (green, positive metrics, validation)
+Warning:   #F59E0B  (amber, alerts, cautions)
+Danger:    #EF4444  (red, errors, destructive actions)
+```
+
+**Category Gradients:**
+```
+Protocol Mechanics:  from-blue-500 to-indigo-600
+DeFi Protocols:      from-green-500 to-teal-600
+Trading Mechanisms:  from-purple-500 to-pink-600
+Infrastructure:      from-orange-500 to-red-600
+```
+
+### Typography System
+
+**Font:** Geist Sans (Vercel's font) with fallbacks
+```css
+font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+```
+
+**Scale:**
+```
+Hero:     32px / font-bold / tracking-tight (-0.02em)
+Title:    24px / font-semibold / tracking-tight (-0.015em)
+Heading:  16px / font-semibold / tracking-tight (-0.01em)
+Body:     14px / font-medium
+Caption:  12px / font-medium / text-neutral-400
+Micro:    10px / font-medium / uppercase / tracking-wide / text-neutral-500
+```
+
+**Rules:**
+- Always use `font-semibold` or `font-bold` for headings (never regular)
+- Body text uses `font-medium` for better readability
+- Apply tight `tracking-tight` on large text for modern feel
+- Labels and captions use `text-neutral-400` or `text-neutral-500`
+
+### Shadows & Depth
+
+**Card Base Shadow:**
+```css
+box-shadow: 
+  0 1px 3px rgba(0, 0, 0, 0.3),
+  0 0 0 1px rgba(255, 255, 255, 0.05);
+```
+
+**Card Hover Shadow:**
+```css
+box-shadow: 
+  0 4px 12px rgba(0, 0, 0, 0.4),
+  0 0 0 1px rgba(59, 130, 246, 0.3);
+```
+
+**Modal/Sidebar Shadow:**
+```css
+box-shadow: 0 0 60px rgba(59, 130, 246, 0.15);
+```
+
+**Rules:**
+- All cards/sections need subtle shadows for depth
+- Hover states elevate with stronger shadows
+- Use `border-white/5` or `border-white/10` for subtle dividers
+- Background gradients: `from-white/[0.03] to-transparent` for glassmorphism
+
+### Input Components
+
+**Focus States:**
+```
+Default:   border-white/10, no shadow
+Focused:   border-blue-500, shadow-[0_0_0_3px_rgba(59,130,246,0.15)]
+Valid:     border-green-500, shadow-[0_0_0_3px_rgba(34,197,94,0.15)]
+Invalid:   border-red-500, shadow-[0_0_0_3px_rgba(239,68,68,0.15)]
+```
+
+**Input Styling:**
+- Use `rounded-lg` for inputs (8px radius)
+- Padding: `px-3 py-3` (12px horizontal, 12px vertical)
+- Text: `text-sm font-medium text-white`
+- Placeholder: `placeholder:text-neutral-600`
+- Background: `bg-gradient-to-br from-white/[0.02] to-transparent`
+- Hide number spinners (see NumberInput.tsx for CSS)
+
+**Validation Feedback:**
+- Show green checkmark ✓ when valid
+- Show red warning icon ⚠ when invalid
+- Animate validation icons with `fade-in` and `slide-in`
+- Display helpful error messages below input in `text-xs text-red-400`
+
+### Icons & Imagery
+
+**Never use emojis for functional UI elements.**
+
+**Icon System:**
+- Use **Heroicons** or **Lucide Icons** (SVG line icons)
+- Size: 24px (w-6 h-6) for large, 20px (w-5 h-5) for medium, 16px (w-4 h-4) for small
+- Stroke: 1.5px width
+- Style: Rounded line caps, consistent padding
+
+**Icon Backgrounds:**
+- Enabled: `bg-gradient-to-br from-[category-gradient] shadow-lg`
+- Disabled: `bg-neutral-800/50`
+- Size: `w-12 h-12` rounded-lg containers
+
+### Cards & Sections
+
+**Standard Card:**
+```tsx
+<section 
+  className="rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-transparent p-6 transition-all hover:border-white/20"
+  style={{
+    boxShadow: "0 1px 3px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.05)",
+  }}
+>
+```
+
+**Premium Card (Sidebar style):**
+```tsx
+<div className="rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-transparent p-5 hover:scale-[1.01] hover:shadow-lg">
+```
+
+**Rules:**
+- Use `rounded-xl` (12px) for cards, `rounded-lg` (8px) for smaller elements
+- Padding: `p-6` (24px) for sections, `p-4` or `p-5` (16-20px) for cards
+- Spacing between cards: `space-y-6` or `gap-6`
+
+### Buttons & Interactive Elements
+
+**Primary Button:**
+```tsx
+<button className="rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all">
+```
+
+**Secondary Button:**
+```tsx
+<button className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white hover:bg-white/10 hover:border-white/20 transition-all">
+```
+
+**Ghost Button:**
+```tsx
+<button className="rounded-lg px-4 py-2 text-sm font-medium text-neutral-400 hover:text-white hover:bg-white/5 transition-all">
+```
+
+**Rules:**
+- Primary actions use gradient backgrounds
+- Secondary actions use subtle borders
+- All buttons have hover scale: `hover:scale-[1.02]`
+- All buttons have active press: `active:scale-[0.98]`
+- Use `font-semibold` for primary, `font-medium` for secondary
+
+### Animations & Transitions
+
+**Standard Transition:**
+```css
+transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+```
+
+**Animation Rules:**
+- Card hover: scale to 1.01 or 1.02
+- Icon hover: scale to 1.1
+- Button press: scale to 0.98
+- Sidebar slide: 300ms ease-out
+- Fade in: 200ms
+- Success states: subtle pulse or bounce
+
+**CSS Classes:**
+- `transition-all duration-200` for most elements
+- `transition-transform duration-300 ease-out` for drawers/modals
+- `animate-in fade-in duration-200` for appearing elements
+- `hover:scale-[1.01]` for cards
+- `active:scale-[0.98]` for buttons
+
+### Spacing & Layout
+
+**Spacing Scale:**
+```
+4px:   gap-1, p-1
+8px:   gap-2, p-2
+12px:  gap-3, p-3
+16px:  gap-4, p-4
+20px:  gap-5, p-5
+24px:  gap-6, p-6  (standard card padding)
+32px:  gap-8, p-8
+```
+
+**Grid Layouts:**
+- 2 columns: `grid grid-cols-1 md:grid-cols-2 gap-6`
+- 3 columns: `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6`
+- Use `gap-6` (24px) for card grids
+- Use `gap-4` (16px) for form fields
+
+### Data Visualization (Charts)
+
+**Chart Styling:**
+- Remove grid lines for cleaner look
+- Use gradient fills for area charts
+- Tooltip: Card-style with shadows and dark background
+- Colors: Use success green, primary blue, danger red
+- Axis: `text-neutral-400` with `text-xs`
+
+**Chart Colors:**
+```
+Positive: #10B981 (green)
+Negative: #EF4444 (red)
+Neutral:  #3B82F6 (blue)
+Warning:  #F59E0B (amber)
+```
+
+### Accessibility
+
+- All interactive elements need focus states
+- Focus rings use the blue glow pattern
+- Color contrast ratio minimum 4.5:1 for text
+- Icons always have accessible labels
+- Form inputs have proper labels and error messages
+
+### Do's and Don'ts
+
+**DO:**
+✅ Use professional SVG icons (Heroicons)
+✅ Apply shadows for depth on cards
+✅ Use gradient backgrounds subtly
+✅ Add micro-animations on hover
+✅ Show validation feedback on inputs
+✅ Use Geist font with proper weights
+✅ Apply tight letter-spacing on headings
+✅ Use the Midnight color palette
+✅ Add focus ring glows on interactive elements
+✅ Scale elements on hover/press
+
+**DON'T:**
+❌ Use emojis for functional UI
+❌ Use flat colors without gradients
+❌ Skip shadows (makes UI look flat)
+❌ Use font-normal for headings
+❌ Use generic neutral-900/950
+❌ Skip hover states on interactive elements
+❌ Use sharp shadows (always use soft shadows)
+❌ Use default browser input styling
+❌ Forget focus states for accessibility
+❌ Use inconsistent border radius
+
+### Component Checklist
+
+When creating any new component, ensure:
+- [ ] Uses Midnight color palette
+- [ ] Has proper shadows and depth
+- [ ] Typography follows scale (font-semibold/bold for headings)
+- [ ] Borders use white/5 or white/10
+- [ ] Has hover states with scale or glow
+- [ ] Interactive elements have focus rings
+- [ ] Spacing uses 24px (gap-6) for sections
+- [ ] Icons are SVG, not emojis
+- [ ] Animations are smooth (200-300ms)
+- [ ] Background has subtle gradient
+
