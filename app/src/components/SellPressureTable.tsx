@@ -58,7 +58,7 @@ export default function SellPressureTable({
     <div className="overflow-x-auto">
       <table className="w-full border-collapse">
         <thead>
-          <tr className="border-b border-neutral-700">
+          <tr className="border-b border-white/[0.08]">
             <th className="px-4 py-3 text-left text-sm font-medium text-neutral-400">
               Group Name/Allocation %
             </th>
@@ -86,7 +86,7 @@ export default function SellPressureTable({
             return (
               <tr
                 key={config.groupId}
-                className={`border-b border-neutral-800 ${
+                className={`border-b border-white/[0.06] ${
                   !config.enabled ? "opacity-50" : ""
                 }`}
               >
@@ -108,7 +108,7 @@ export default function SellPressureTable({
                 {/* Cost Basis */}
                 <td className="px-4 py-3">
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm pointer-events-none z-10">
                       $
                     </span>
                     <input
@@ -119,7 +119,8 @@ export default function SellPressureTable({
                         handleCostBasisChange(idx, parseFloat(e.target.value) || 0)
                       }
                       disabled={!config.enabled}
-                      className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-2 pl-6 text-sm text-white focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                      className="input-glass focus:border-cyan-500"
+                      style={{ paddingLeft: '2rem' }}
                       placeholder="0"
                     />
                   </div>
@@ -127,7 +128,7 @@ export default function SellPressureTable({
 
                 {/* Implied FDV */}
                 <td className="px-4 py-3">
-                  <div className="rounded-lg bg-neutral-800 px-4 py-2 text-sm text-neutral-400">
+                  <div className="glass-surface px-4 py-2 text-sm text-slate-400">
                     {impliedFdvDisplay}
                   </div>
                 </td>
@@ -138,7 +139,7 @@ export default function SellPressureTable({
                     value={config.preset}
                     onChange={(e) => handlePresetChange(idx, e.target.value)}
                     disabled={!config.enabled}
-                    className="w-full cursor-pointer rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2 text-sm text-white focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                    className="select-glass cursor-pointer focus:border-cyan-500"
                   >
                     {Object.entries(SELL_PRESSURE_PRESETS).map(([key, def]) => (
                       <option key={key} value={key}>

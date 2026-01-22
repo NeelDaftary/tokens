@@ -125,8 +125,8 @@ export default function CLMMChart({ bands }: { bands: LiquidityBand[] }) {
                         borderColor: "#262626",
                         borderRadius: "0.5rem",
                     }}
-                    formatter={(val: number) => [
-                        `$${Math.round(val).toLocaleString()}`,
+                    formatter={(val: number | undefined) => [
+                        val !== undefined ? `$${Math.round(val).toLocaleString()}` : "",
                         "Density ($/price)",
                     ]}
                     labelFormatter={(label) => `Price ${Number(label).toFixed(4)}`}

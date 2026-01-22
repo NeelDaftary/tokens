@@ -65,7 +65,7 @@ const icons = {
 };
 
 const getIconForSimulator = (id: string) => {
-  const iconMap: Record<string, JSX.Element> = {
+  const iconMap: Record<string, React.ReactElement> = {
     "depin": icons.network,
     "bonding-curve": icons.chart,
     "ve-tokenomics": icons.vote,
@@ -80,12 +80,28 @@ const getIconForSimulator = (id: string) => {
   return iconMap[id] || icons.network;
 };
 
-// Category gradient colors
-const categoryGradients: Record<SimulatorCategory, string> = {
-  "Protocol Mechanics": "from-blue-500 to-indigo-600",
-  "DeFi Protocols": "from-green-500 to-teal-600",
-  "Trading Mechanisms": "from-purple-500 to-pink-600",
-  "Infrastructure": "from-orange-500 to-red-600",
+// Category gradient colors - Updated for cyan/teal theme
+const categoryGradients: Record<SimulatorCategory, { bg: string; border: string; glow: string }> = {
+  "Protocol Mechanics": { 
+    bg: "from-cyan-500 to-teal-600", 
+    border: "border-cyan-500/30",
+    glow: "shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+  },
+  "DeFi Protocols": { 
+    bg: "from-emerald-500 to-cyan-600", 
+    border: "border-emerald-500/30",
+    glow: "shadow-[0_0_20px_rgba(52,211,153,0.3)]"
+  },
+  "Trading Mechanisms": { 
+    bg: "from-violet-500 to-purple-600", 
+    border: "border-violet-500/30",
+    glow: "shadow-[0_0_20px_rgba(167,139,250,0.3)]"
+  },
+  "Infrastructure": { 
+    bg: "from-orange-500 to-amber-600", 
+    border: "border-orange-500/30",
+    glow: "shadow-[0_0_20px_rgba(251,146,60,0.3)]"
+  },
 };
 
 export default function SimulatorSidebar({ isOpen, onClose }: SimulatorSidebarProps) {
@@ -103,7 +119,7 @@ export default function SimulatorSidebar({ isOpen, onClose }: SimulatorSidebarPr
     <>
       {/* Backdrop with blur */}
       <div
-        className={`fixed inset-0 bg-black/60 backdrop-blur-md transition-all duration-300 z-40 ${
+        className={`fixed inset-0 bg-[#06080D]/80 backdrop-blur-xl transition-all duration-500 z-40 ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
@@ -111,122 +127,158 @@ export default function SimulatorSidebar({ isOpen, onClose }: SimulatorSidebarPr
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full bg-gradient-to-b from-[#0A0A0F] to-[#13131A] border-l border-white/5 shadow-2xl z-50 transition-transform duration-300 ease-out ${
+        className={`fixed top-0 right-0 h-full z-50 transition-all duration-500 ease-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
-        } w-full sm:w-[440px] md:w-[480px] overflow-y-auto`}
-        style={{
-          boxShadow: "0 0 60px rgba(59, 130, 246, 0.15)",
-        }}
+        } w-full sm:w-[440px] md:w-[480px] overflow-hidden`}
       >
-        {/* Header with gradient */}
-        <div className="sticky top-0 bg-gradient-to-b from-[#0A0A0F] via-[#0A0A0F] to-transparent backdrop-blur-xl border-b border-white/5 p-6 z-10">
-          <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
-                <span className="text-blue-400">⚡</span>
-                Simulation Tools
-              </h2>
-              <p className="text-sm text-neutral-400 mt-1 font-medium">
-                Specialized calculators and simulators
-              </p>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-lg hover:bg-white/5 transition-all text-neutral-400 hover:text-white group"
-              aria-label="Close sidebar"
-            >
-              <svg className="w-5 h-5 transition-transform group-hover:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
+        {/* Glass background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0A0E14]/95 via-[#0A0E14]/98 to-[#06080D] backdrop-blur-2xl" />
+        
+        {/* Left border glow */}
+        <div className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-cyan-500/50 via-cyan-500/20 to-transparent" />
+        <div 
+          className="absolute left-0 top-0 bottom-0 w-20 pointer-events-none"
+          style={{
+            background: 'linear-gradient(90deg, rgba(34,211,238,0.08) 0%, transparent 100%)',
+          }}
+        />
 
-        {/* Content */}
-        <div className="p-6 space-y-8">
-          {Object.entries(simulatorsByCategory).map(([category, simulators]) => (
-            <div key={category} className="space-y-4">
-              {/* Category Header with gradient */}
-              <div className="flex items-center gap-3">
-                <div className={`w-1 h-6 rounded-full bg-gradient-to-b ${categoryGradients[category as SimulatorCategory]}`} />
-                <div className="flex-1">
-                  <h3 className="text-sm font-semibold text-white tracking-tight">{category}</h3>
-                  <p className="text-xs text-neutral-500 font-medium">
-                    {CATEGORY_INFO[category as SimulatorCategory].description}
+        {/* Content container */}
+        <div className="relative h-full overflow-y-auto">
+          {/* Header with gradient */}
+          <div className="sticky top-0 z-10 backdrop-blur-xl border-b border-white/[0.06]">
+            <div 
+              className="absolute inset-0 bg-gradient-to-b from-[#0A0E14] to-transparent"
+              style={{ backdropFilter: 'blur(20px)' }}
+            />
+            <div className="relative p-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold tracking-tight flex items-center gap-3">
+                    <span className="text-gradient-cyan">⚡</span>
+                    <span className="text-slate-100">Simulation Tools</span>
+                  </h2>
+                  <p className="text-sm text-slate-400 mt-1.5 font-medium">
+                    Specialized calculators and simulators
                   </p>
                 </div>
-              </div>
-
-              {/* Simulators as premium cards */}
-              <div className="space-y-3">
-                {simulators.map((simulator) => (
-                  <button
-                    key={simulator.id}
-                    onClick={() => handleSimulatorClick(simulator)}
-                    disabled={!simulator.enabled}
-                    className={`group w-full text-left rounded-xl border transition-all duration-200 ${
-                      simulator.enabled
-                        ? `border-white/10 bg-gradient-to-br from-white/[0.03] to-transparent hover:border-${categoryGradients[category as SimulatorCategory].split(' ')[1].replace('to-', '')}/30 hover:shadow-lg cursor-pointer hover:scale-[1.01]`
-                        : "border-white/5 bg-white/[0.01] cursor-not-allowed opacity-60"
-                    }`}
-                    style={simulator.enabled ? {
-                      boxShadow: "0 1px 3px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.05)",
-                    } : undefined}
-                  >
-                    <div className="p-5">
-                      <div className="flex items-start gap-4">
-                        {/* Icon with gradient background */}
-                        <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center ${
-                          simulator.enabled 
-                            ? `bg-gradient-to-br ${categoryGradients[category as SimulatorCategory]} shadow-lg`
-                            : "bg-neutral-800/50"
-                        } transition-transform duration-200 ${simulator.enabled ? 'group-hover:scale-110' : ''}`}>
-                          <div className="text-white">
-                            {getIconForSimulator(simulator.id)}
-                          </div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <h4 className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors tracking-tight">
-                              {simulator.name}
-                            </h4>
-                            {!simulator.enabled && (
-                              <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-neutral-800/80 text-neutral-500 uppercase tracking-wider whitespace-nowrap">
-                                Soon
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-xs text-neutral-400 mt-1.5 leading-relaxed font-medium">
-                            {simulator.description}
-                          </p>
-                        </div>
-
-                        {/* Arrow for enabled */}
-                        {simulator.enabled && (
-                          <div className="flex-shrink-0 text-neutral-600 group-hover:text-blue-400 transition-all group-hover:translate-x-1">
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </button>
-                ))}
+                <button
+                  onClick={onClose}
+                  className="btn-icon group"
+                  aria-label="Close sidebar"
+                >
+                  <svg className="w-5 h-5 transition-all duration-300 group-hover:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
             </div>
-          ))}
+          </div>
 
-          {/* Footer */}
-          <div className="pt-4 border-t border-white/5">
-            <p className="text-xs text-center text-neutral-500 font-medium">
-              More tools coming soon •{" "}
-              <a href="mailto:feedback@example.com" className="text-blue-400 hover:text-blue-300 transition-colors font-semibold">
-                Request a feature
-              </a>
-            </p>
+          {/* Content */}
+          <div className="relative p-6 space-y-8">
+            {Object.entries(simulatorsByCategory).map(([category, simulators], categoryIndex) => (
+              <div 
+                key={category} 
+                className="space-y-4 animate-fade-in-up"
+                style={{ animationDelay: `${categoryIndex * 100}ms` }}
+              >
+                {/* Category Header with gradient accent */}
+                <div className="flex items-center gap-3">
+                  <div className={`w-1 h-7 rounded-full bg-gradient-to-b ${categoryGradients[category as SimulatorCategory].bg}`} />
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold text-slate-200 tracking-tight">{category}</h3>
+                    <p className="text-xs text-slate-500 font-medium mt-0.5">
+                      {CATEGORY_INFO[category as SimulatorCategory].description}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Simulators as premium glass cards */}
+                <div className="space-y-3">
+                  {simulators.map((simulator, simIndex) => (
+                    <button
+                      key={simulator.id}
+                      onClick={() => handleSimulatorClick(simulator)}
+                      disabled={!simulator.enabled}
+                      className={`
+                        group w-full text-left rounded-xl border transition-all duration-300
+                        animate-fade-in-up
+                        ${simulator.enabled
+                          ? `
+                            bg-[rgba(15,20,28,0.6)] backdrop-blur-xl
+                            border-white/[0.06] 
+                            hover:border-cyan-500/30 
+                            hover:bg-[rgba(20,28,40,0.7)]
+                            hover:shadow-[0_8px_32px_rgba(0,0,0,0.4),0_0_20px_rgba(34,211,238,0.15)]
+                            hover:scale-[1.02]
+                            cursor-pointer
+                          `
+                          : "bg-white/[0.02] border-white/[0.03] cursor-not-allowed opacity-50"
+                        }
+                      `}
+                      style={{ animationDelay: `${(categoryIndex * 100) + (simIndex * 50)}ms` }}
+                    >
+                      <div className="p-5">
+                        <div className="flex items-start gap-4">
+                          {/* Icon with gradient background */}
+                          <div className={`
+                            flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center 
+                            transition-all duration-300
+                            ${simulator.enabled 
+                              ? `bg-gradient-to-br ${categoryGradients[category as SimulatorCategory].bg} 
+                                 shadow-lg group-hover:shadow-xl group-hover:scale-110
+                                 ${categoryGradients[category as SimulatorCategory].glow}`
+                              : "bg-slate-800/50"
+                            }
+                          `}>
+                            <div className="text-white">
+                              {getIconForSimulator(simulator.id)}
+                            </div>
+                          </div>
+
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <h4 className="text-sm font-semibold text-slate-200 group-hover:text-cyan-400 transition-colors duration-300 tracking-tight">
+                                {simulator.name}
+                              </h4>
+                              {!simulator.enabled && (
+                                <span className="badge badge-neutral text-[10px]">
+                                  Soon
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-slate-400 mt-1.5 leading-relaxed font-medium group-hover:text-slate-300 transition-colors duration-300">
+                              {simulator.description}
+                            </p>
+                          </div>
+
+                          {/* Arrow for enabled */}
+                          {simulator.enabled && (
+                            <div className="flex-shrink-0 text-slate-600 group-hover:text-cyan-400 transition-all duration-300 group-hover:translate-x-1">
+                              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            {/* Footer */}
+            <div className="pt-6 border-t border-white/[0.06]">
+              <p className="text-xs text-center text-slate-500 font-medium">
+                More tools coming soon •{" "}
+                <a href="mailto:[REDACTED]" className="text-cyan-400 hover:text-cyan-300 transition-colors duration-300 font-semibold hover:underline">
+                  Request a feature
+                </a>
+              </p>
+            </div>
           </div>
         </div>
       </div>

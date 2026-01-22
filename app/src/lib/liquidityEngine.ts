@@ -12,6 +12,8 @@ import type {
   OptionCostScenario,
   SeedingReference,
   DexPoolPlan,
+  MMContractRequirements,
+  StrikeTranche,
 } from "@/types/liquidity";
 
 // Constants (adjustable)
@@ -149,6 +151,10 @@ function computeFragmentation(model: LiquidityModel): FragmentationAnalysis {
 
 /**
  * Compute DEX inventory requirements
+ * 
+ * NOTE: DEX pools are typically seeded by the team directly, not by MMs.
+ * Therefore, DEX inventory always requires both tokens AND stables/quote from the client,
+ * regardless of the MM deal model (which primarily affects CEX liquidity).
  */
 // 3. DEX Inventory
 function computeDexInventory(
@@ -258,6 +264,11 @@ function computeDexInventory(
 
 /**
  * Compute CEX inventory requirements
+ * 
+ * IMPORTANT: CEX stablecoin requirements depend on the MM deal model:
+ * - Loan + Call Option: MM provides stables, client only provides tokens
+ * - Retainer (Client Funded): Client provides both tokens and stables
+ * - Retainer (Profit Share): MM provides stables, client only provides tokens
  */
 // 4. CEX Inventory
 function computeCexInventory(
@@ -275,11 +286,21 @@ function computeCexInventory(
 
   const volBuffer = VOLATILITY_BUFFERS[model.regime.volatility];
 
+  // Determine if client needs to provide stables for CEX based on deal model
+  // - Loan + Call: MM provides stables (client provides 0)
+  // - Retainer + Client Funded: Client provides stables
+  // - Retainer + Profit Share: MM provides stables (client provides 0)
+  const clientProvidesCexStables = 
+    model.deal.model === "Retainer" && 
+    model.deal.assetDeploymentModel === "ClientFunded";
+
   // Tier 1
   if (model.cexTierMonth1.tier1 > 0) {
     const reqUsd = referenceDepthUsd * volBuffer * model.cexTierMonth1.tier1;
     totalTokenAmount += (reqUsd / 2) / tgePriceUsd;
-    totalStableUsd += reqUsd / 2;
+    if (clientProvidesCexStables) {
+      totalStableUsd += reqUsd / 2;
+    }
   }
 
   // Tier 2
@@ -287,7 +308,9 @@ function computeCexInventory(
     const fraction = model.cexLiquidityFractions.tier2;
     const reqUsd = referenceDepthUsd * fraction * volBuffer * model.cexTierMonth1.tier2;
     totalTokenAmount += (reqUsd / 2) / tgePriceUsd;
-    totalStableUsd += reqUsd / 2;
+    if (clientProvidesCexStables) {
+      totalStableUsd += reqUsd / 2;
+    }
   }
 
   // Tier 3
@@ -295,7 +318,9 @@ function computeCexInventory(
     const fraction = model.cexLiquidityFractions.tier3;
     const reqUsd = referenceDepthUsd * fraction * volBuffer * model.cexTierMonth1.tier3;
     totalTokenAmount += (reqUsd / 2) / tgePriceUsd;
-    totalStableUsd += reqUsd / 2;
+    if (clientProvidesCexStables) {
+      totalStableUsd += reqUsd / 2;
+    }
   }
 
   return {
@@ -444,6 +469,131 @@ function computeFeasibility(
 }
 
 /**
+ * Calculate strike price from strike tranche
+ */
+function calculateStrikePrice(
+  tranche: StrikeTranche,
+  tgePriceUsd: number,
+  currentPriceUsd: number,
+  twapPriceUsd: number
+): number {
+  switch (tranche.strikeBasis) {
+    case "FixedPrice":
+      if (tranche.fixedPriceUsd) {
+        return tranche.fixedPriceUsd;
+      }
+      if (tranche.fixedPriceFdv) {
+        // Convert FDV to price (approximate, would need total supply)
+        // For now, use a placeholder - this would need model context
+        return tranche.fixedPriceFdv / 1_000_000_000; // rough estimate
+      }
+      return tgePriceUsd * 1.5; // fallback
+
+    case "CurrentPrice":
+      return currentPriceUsd * (tranche.currentPriceMultiplier || 1.5);
+
+    case "TWAPMultiplier":
+      return twapPriceUsd * (tranche.twapMultiplier || 1.5);
+
+    default:
+      return tgePriceUsd * 1.5;
+  }
+}
+
+/**
+ * Compute MM contract requirements for Option A (Loan + Call)
+ */
+function computeLoanCallRequirements(
+  model: LiquidityModel,
+  totalSupplyApprox: number,
+  tgePriceUsd: number
+): MMContractRequirements {
+  const loanAmountPct = model.deal.loanAmountPct || 0;
+  const tokenProvisionRequired = (loanAmountPct / 100) * totalSupplyApprox;
+
+  // Stablecoin provision: 0 unless client provides stables
+  let stablecoinProvisionRequired = 0;
+  if (model.deal.clientProvidesStables) {
+    // If client provides stables, calculate as 50/50 split (like DEX logic)
+    const loanValueUsd = tokenProvisionRequired * tgePriceUsd;
+    stablecoinProvisionRequired = loanValueUsd / 2;
+  }
+
+  // Strike tranche breakdown
+  const strikeTrancheBreakdown =
+    model.deal.strikeTranches?.map((tranche) => {
+      // For display, use TGE price as reference (actual strike calculated in scenarios)
+      const strikePrice = calculateStrikePrice(tranche, tgePriceUsd, tgePriceUsd, tgePriceUsd);
+      const trancheTokens = (tranche.loanPct / 100) * tokenProvisionRequired;
+
+      let strikeDescription = "";
+      switch (tranche.strikeBasis) {
+        case "FixedPrice":
+          if (tranche.fixedPriceUsd) {
+            strikeDescription = `Fixed: $${tranche.fixedPriceUsd.toFixed(4)}`;
+          } else if (tranche.fixedPriceFdv) {
+            strikeDescription = `Fixed FDV: $${(tranche.fixedPriceFdv / 1_000_000).toFixed(0)}M`;
+          }
+          break;
+        case "CurrentPrice":
+          strikeDescription = `Current × ${tranche.currentPriceMultiplier || 1.5}`;
+          break;
+        case "TWAPMultiplier":
+          strikeDescription = `TWAP × ${tranche.twapMultiplier || 1.5}`;
+          break;
+      }
+
+      return {
+        loanPct: tranche.loanPct,
+        strikePrice,
+        strikeDescription,
+        tokens: trancheTokens,
+      };
+    }) || [];
+
+  return {
+    tokenProvisionRequired,
+    stablecoinProvisionRequired,
+    strikeTrancheBreakdown,
+  };
+}
+
+/**
+ * Compute MM contract requirements for Option B (Retainer/Hybrid)
+ */
+function computeRetainerRequirements(
+  model: LiquidityModel,
+  contractDurationMonths: number
+): MMContractRequirements {
+  const retainerMonthlyUsd = model.deal.retainerMonthlyUsd || 0;
+  const totalRetainerCost = retainerMonthlyUsd * contractDurationMonths;
+
+  const tokenProvisionRequired = model.deal.liquidityFundingTokensUsd || 0;
+
+  let stablecoinProvisionRequired = 0;
+  if (model.deal.assetDeploymentModel === "ClientFunded") {
+    stablecoinProvisionRequired = model.deal.liquidityFundingStablesUsd || 0;
+  }
+  // For ProfitShare, MM provides stables, so client provides 0
+
+  // Profit share estimate (simplified - would need NAV modeling)
+  let profitShareEstimate = 0;
+  if (model.deal.assetDeploymentModel === "ProfitShare" && model.deal.profitSharePct) {
+    // Very rough estimate: assume 2x NAV increase over contract duration
+    // This is a placeholder - real calculation would need NAV tracking
+    const assumedNavIncrease = 2.0;
+    profitShareEstimate = tokenProvisionRequired * assumedNavIncrease * (model.deal.profitSharePct / 100);
+  }
+
+  return {
+    totalRetainerCost,
+    tokenProvisionRequired,
+    stablecoinProvisionRequired,
+    profitShareEstimate: profitShareEstimate > 0 ? profitShareEstimate : undefined,
+  };
+}
+
+/**
  * Compute deal comparison
  */
 // 8. Deal Comparison
@@ -455,55 +605,65 @@ function computeDealComparison(
   // Retainer cost (90 days = 3 months for fairness)
   const retainerCost90dUsd = (model.deal.retainerMonthlyUsd || 0) * 3;
 
-  // Loan+Call option scenarios (total for all tranches)
+  // MM Contract Requirements
+  let mmContractRequirements: MMContractRequirements | undefined;
 
+  if (model.deal.model === "LoanCall") {
+    mmContractRequirements = computeLoanCallRequirements(model, totalSupplyApprox, tgePriceUsd);
+  } else if (model.deal.model === "Retainer") {
+    const contractDurationMonths = model.deal.contractDurationMonths || 12;
+    mmContractRequirements = computeRetainerRequirements(model, contractDurationMonths);
+  }
+
+  // Loan+Call option scenarios (using new strikeTranches structure)
   const fdvMultipliers = [1, 2, 5];
-
-  // Need to sum up tokens and value transfer for each scenario across all tranches
   const optionCostScenarios: OptionCostScenario[] = fdvMultipliers.map((mult) => {
     const fdvUsd = model.launchMarketCapUsd * mult;
     const spotPrice = fdvUsd / totalSupplyApprox;
+    const twapPriceUsd = tgePriceUsd * 1.1; // Simplified TWAP estimate (10% above TGE)
 
     let totalOptionTokens = 0;
     let totalValueTransferred = 0;
+    let avgStrikePrice = 0;
 
-    if (model.deal.tranches && model.deal.tranches.length > 0) {
-      // Multi-tranche
+    if (model.deal.model === "LoanCall" && model.deal.strikeTranches && model.deal.strikeTranches.length > 0) {
+      const loanAmountPct = model.deal.loanAmountPct || 0;
+      const loanTokens = (loanAmountPct / 100) * totalSupplyApprox;
+
+      let strikeSum = 0;
+      for (const tranche of model.deal.strikeTranches) {
+        const trancheTokens = (tranche.loanPct / 100) * loanTokens;
+        const strikePrice = calculateStrikePrice(tranche, tgePriceUsd, spotPrice, twapPriceUsd);
+
+        const valTransfer = Math.max(0, (spotPrice - strikePrice) * trancheTokens);
+
+        totalOptionTokens += trancheTokens;
+        totalValueTransferred += valTransfer;
+        strikeSum += strikePrice * trancheTokens;
+      }
+
+      if (totalOptionTokens > 0) {
+        avgStrikePrice = strikeSum / totalOptionTokens;
+      }
+    } else if (model.deal.tranches && model.deal.tranches.length > 0) {
+      // Legacy support for old tranche structure
       for (const tranche of model.deal.tranches) {
         const trancheLoanSize = (tranche.loanSizePct / 100) * totalSupplyApprox;
-
-        // Each tranche might have multiple strikes.
-        // Simplified: assume average strike or just the first one.
-        // Or split the loan size across strikes?
-        // Let's assume the tranche loan corresponds to the strikes.
-        // If multiple strikes, we'd average them?
-        // Let's take the first strike for now, parsing the string... 
-        // Wait, user enters string like "TGE + 50%".
-        // We don't have a structured "premiumPct" field in tranche anymore, strictly speaking.
-        // But I can add one or parse it?
-        // The `DealTrancheEditor` has `strikePrice` as string.
-        // This makes calculation hard.
-        // Maybe I should add a hidden/structured `premiumPct` or `strikePriceUsd` to `DealTranche`?
-        // Or just assume a default premium for calculation since it's "Estimated".
-        // Let's assume +50% premium for calculation purposes if not parseable.
-
-        const premiumPct = 0.5; // Default assumption for estimation
+        const premiumPct = 0.5; // Default assumption
         const strikePrice = tgePriceUsd * (1 + premiumPct);
-
         const valTransfer = Math.max(0, (spotPrice - strikePrice) * trancheLoanSize);
 
         totalOptionTokens += trancheLoanSize;
         totalValueTransferred += valTransfer;
+        avgStrikePrice = strikePrice;
       }
-    } else {
-      // No tranches defined, assumed 0 cost
     }
 
     return {
       fdvMultiplier: mult,
       fdvUsd,
       spotPrice,
-      strikePrice: 0, // Not single strike anymore, maybe set to 0 or avg?
+      strikePrice: avgStrikePrice,
       optionTokens: totalOptionTokens,
       valueTransferred: totalValueTransferred,
     };
@@ -512,6 +672,7 @@ function computeDealComparison(
   return {
     retainerCost90dUsd,
     optionCostScenarios,
+    mmContractRequirements,
   };
 }
 

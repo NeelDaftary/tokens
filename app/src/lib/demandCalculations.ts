@@ -10,7 +10,17 @@ import type {
   NetPressureDataPoint,
   NetPressureComputationResult,
 } from "@/types/demand";
-import { SELL_PRESSURE_PRESETS } from "@/types/demand";
+import { SELL_PRESSURE_PRESETS, BuybacksSimple } from "@/types/demand";
+import { computeBuybacksDriver, convertBuybacksConfig } from "./demandDrivers/buybacks";
+import { computeStakingDriver, convertStakingConfig } from "./demandDrivers/staking";
+import { computeLockingDriver, convertLockingConfig } from "./demandDrivers/locking";
+import { computeFeeDiscountsDriver, convertFeeDiscountsConfig } from "./demandDrivers/feeDiscounts";
+import { computePaymentDriver, convertPaymentConfig } from "./demandDrivers/payment";
+import { computeCollateralDriver, convertCollateralConfig } from "./demandDrivers/collateral";
+import { computeTokenGatedDriver, convertTokenGatedConfig } from "./demandDrivers/tokenGated";
+import { computeGasDriver, convertGasConfig } from "./demandDrivers/gas";
+import { computeBondingCurveDriver, convertBondingCurveConfig } from "./demandDrivers/bondingCurve";
+import { createConstantPriceSeries, createConstantSupplySeries, type GlobalInputs } from "./demandDrivers/shared";
 
 /**
  * Compute demand series for all enabled sources
@@ -45,7 +55,24 @@ export function computeDemandSeries(
       const dataPoint = src.series.find((d) => d.month === month);
       return acc + (dataPoint?.usd || 0);
     }, 0);
-    totalSeries.push({ month, tokens: tokensSum, usd: usdSum });
+
+    // Aggregating breakdown
+    const buySum = bySource.reduce((acc, src) => (acc + (src.series.find((d) => d.month === month)?.buy_tokens || 0)), 0);
+    const holdSum = bySource.reduce((acc, src) => (acc + (src.series.find((d) => d.month === month)?.hold_tokens || 0)), 0);
+    const spendSum = bySource.reduce((acc, src) => (acc + (src.series.find((d) => d.month === month)?.spend_tokens || 0)), 0);
+    const burnSum = bySource.reduce((acc, src) => (acc + (src.series.find((d) => d.month === month)?.burn_tokens || 0)), 0);
+    const sellSum = bySource.reduce((acc, src) => (acc + (src.series.find((d) => d.month === month)?.sell_tokens || 0)), 0);
+
+    totalSeries.push({
+      month,
+      tokens: tokensSum,
+      usd: usdSum,
+      buy_tokens: buySum,
+      hold_tokens: holdSum,
+      spend_tokens: spendSum,
+      burn_tokens: burnSum,
+      sell_tokens: sellSum
+    });
   }
 
   return { bySource, totalSeries };
@@ -62,94 +89,412 @@ function calculateSourceDemand(
 ): DemandDataPoint[] {
   const series: DemandDataPoint[] = [];
 
+  // Handle buybacks using the new driver system
+  if (source.type === "buybacks" && source.mode === "simple") {
+    const simpleConfig = source.config as BuybacksSimple;
+    const config = convertBuybacksConfig(simpleConfig);
+    
+    // Create global inputs (constant price and supply for now)
+    const inputs: GlobalInputs = {
+      P: createConstantPriceSeries(tokenPrice, horizonMonths),
+      S_circ: createConstantSupplySeries(totalSupply, horizonMonths),
+    };
+    
+    // Compute buybacks driver outputs
+    const outputs = computeBuybacksDriver(config, inputs, horizonMonths);
+    
+    // Convert driver outputs to DemandDataPoint format
+    for (let month = 0; month <= horizonMonths; month++) {
+      const buy = outputs.buy_tokens[month] || 0;
+      const burn = outputs.burn_tokens[month] || 0;
+      const hold = outputs.hold_tokens[month] || 0;
+      
+      // Total tokens = buy tokens (they're bought from market)
+      // USD = buy tokens * price
+      const tokens = buy;
+      const usd = tokens * (inputs.P[month] || tokenPrice);
+      
+      series.push({
+        month,
+        tokens,
+        usd,
+        buy_tokens: buy,
+        burn_tokens: burn,
+        hold_tokens: hold,
+        spend_tokens: outputs.spend_tokens[month] || 0,
+        sell_tokens: outputs.sell_tokens[month] || 0,
+        debug: outputs.debug[month],
+      });
+    }
+    
+    return series;
+  }
+
+  // Handle staking using the new driver system
+  if (source.type === "staking" && source.mode === "simple") {
+    const simpleConfig = source.config as any; // StakingSimple
+    const config = convertStakingConfig(simpleConfig);
+    
+    // Create global inputs (constant price and supply for now)
+    // Note: For staking, we need circulating supply which may change over time
+    // For now, use constant supply, but this should be updated when supply model is available
+    const inputs: GlobalInputs = {
+      P: createConstantPriceSeries(tokenPrice, horizonMonths),
+      S_circ: createConstantSupplySeries(totalSupply, horizonMonths),
+      // FeesUSD would come from other modules or user inputs
+      FeesUSD: undefined, // Will be used if revenue_share mechanism is selected
+    };
+    
+    // Compute staking driver outputs
+    const outputs = computeStakingDriver(config, inputs, horizonMonths);
+    
+    // Convert driver outputs to DemandDataPoint format
+    for (let month = 0; month <= horizonMonths; month++) {
+      const buy = outputs.buy_tokens[month] || 0;
+      const hold = outputs.hold_tokens[month] || 0;
+      const sell = outputs.sell_tokens[month] || 0;
+      
+      // Total tokens = hold tokens (staking demand)
+      // USD = hold tokens * price (value locked)
+      const tokens = hold; // Primary metric is tokens staked
+      const usd = tokens * (inputs.P[month] || tokenPrice);
+      
+      series.push({
+        month,
+        tokens,
+        usd,
+        buy_tokens: buy,
+        hold_tokens: hold,
+        spend_tokens: outputs.spend_tokens[month] || 0,
+        burn_tokens: outputs.burn_tokens[month] || 0,
+        sell_tokens: sell,
+        debug: outputs.debug[month],
+      });
+    }
+    
+    return series;
+  }
+
+  // Handle locking using the new driver system
+  if (source.type === "locking" && source.mode === "simple") {
+    const simpleConfig = source.config as any; // LockingSimple
+    const config = convertLockingConfig(simpleConfig);
+    
+    // Create global inputs
+    const inputs: GlobalInputs = {
+      P: createConstantPriceSeries(tokenPrice, horizonMonths),
+      S_circ: createConstantSupplySeries(totalSupply, horizonMonths),
+    };
+    
+    // Compute locking driver outputs
+    const outputs = computeLockingDriver(config, inputs, horizonMonths);
+    
+    // Convert driver outputs to DemandDataPoint format
+    for (let month = 0; month <= horizonMonths; month++) {
+      const buy = outputs.buy_tokens[month] || 0;
+      const hold = outputs.hold_tokens[month] || 0;
+      
+      // Total tokens = net locked tokens
+      const tokens = Math.abs(hold); // Use absolute value for display
+      const usd = tokens * (inputs.P[month] || tokenPrice);
+      
+      series.push({
+        month,
+        tokens,
+        usd,
+        buy_tokens: buy,
+        hold_tokens: hold,
+        spend_tokens: outputs.spend_tokens[month] || 0,
+        burn_tokens: outputs.burn_tokens[month] || 0,
+        sell_tokens: outputs.sell_tokens[month] || 0,
+        debug: outputs.debug[month],
+      });
+    }
+    
+    return series;
+  }
+
+  // Handle fee_discounts using the new driver system
+  if (source.type === "fee_discounts" && source.mode === "simple") {
+    const simpleConfig = source.config as any; // FeeDiscountsSimple
+    const config = convertFeeDiscountsConfig(simpleConfig);
+    
+    // Create global inputs
+    const inputs: GlobalInputs = {
+      P: createConstantPriceSeries(tokenPrice, horizonMonths),
+      S_circ: createConstantSupplySeries(totalSupply, horizonMonths),
+    };
+    
+    // Compute fee discounts driver outputs
+    const outputs = computeFeeDiscountsDriver(config, inputs, horizonMonths);
+    
+    // Convert driver outputs to DemandDataPoint format
+    for (let month = 0; month <= horizonMonths; month++) {
+      const buy = outputs.buy_tokens[month] || 0;
+      const hold = outputs.hold_tokens[month] || 0;
+      
+      // Total tokens = hold requirement
+      const tokens = hold;
+      const usd = tokens * (inputs.P[month] || tokenPrice);
+      
+      series.push({
+        month,
+        tokens,
+        usd,
+        buy_tokens: buy,
+        hold_tokens: hold,
+        spend_tokens: outputs.spend_tokens[month] || 0,
+        burn_tokens: outputs.burn_tokens[month] || 0,
+        sell_tokens: outputs.sell_tokens[month] || 0,
+        debug: outputs.debug[month],
+      });
+    }
+    
+    return series;
+  }
+
+  // Handle payment using the new driver system
+  if (source.type === "payment" && source.mode === "simple") {
+    const simpleConfig = source.config as any; // PaymentSimple
+    const config = convertPaymentConfig(simpleConfig);
+    
+    // Create global inputs
+    const inputs: GlobalInputs = {
+      P: createConstantPriceSeries(tokenPrice, horizonMonths),
+      S_circ: createConstantSupplySeries(totalSupply, horizonMonths),
+      FeesUSD: undefined, // Will be used if pay-fees-in-token is enabled
+    };
+    
+    // Compute payment driver outputs
+    const outputs = computePaymentDriver(config, inputs, horizonMonths);
+    
+    // Convert driver outputs to DemandDataPoint format
+    for (let month = 0; month <= horizonMonths; month++) {
+      const spend = outputs.spend_tokens[month] || 0;
+      const hold = outputs.hold_tokens[month] || 0;
+      
+      // Total tokens = spend tokens (primary metric)
+      const tokens = spend;
+      const usd = tokens * (inputs.P[month] || tokenPrice);
+      
+      series.push({
+        month,
+        tokens,
+        usd,
+        buy_tokens: outputs.buy_tokens[month] || 0,
+        hold_tokens: hold,
+        spend_tokens: spend,
+        burn_tokens: outputs.burn_tokens[month] || 0,
+        sell_tokens: outputs.sell_tokens[month] || 0,
+        debug: outputs.debug[month],
+      });
+    }
+    
+    return series;
+  }
+
+  // Handle collateral using the new driver system
+  if (source.type === "collateral" && source.mode === "simple") {
+    const simpleConfig = source.config as any; // CollateralSimple
+    const config = convertCollateralConfig(simpleConfig);
+    
+    // Create global inputs
+    const inputs: GlobalInputs = {
+      P: createConstantPriceSeries(tokenPrice, horizonMonths),
+      S_circ: createConstantSupplySeries(totalSupply, horizonMonths),
+    };
+    
+    // Compute collateral driver outputs
+    const outputs = computeCollateralDriver(config, inputs, horizonMonths);
+    
+    // Convert driver outputs to DemandDataPoint format
+    for (let month = 0; month <= horizonMonths; month++) {
+      const buy = outputs.buy_tokens[month] || 0;
+      const hold = outputs.hold_tokens[month] || 0;
+      
+      // Total tokens = collateral tokens locked
+      const tokens = hold;
+      const usd = tokens * (inputs.P[month] || tokenPrice);
+      
+      series.push({
+        month,
+        tokens,
+        usd,
+        buy_tokens: buy,
+        hold_tokens: hold,
+        spend_tokens: outputs.spend_tokens[month] || 0,
+        burn_tokens: outputs.burn_tokens[month] || 0,
+        sell_tokens: outputs.sell_tokens[month] || 0,
+        debug: outputs.debug[month],
+      });
+    }
+    
+    return series;
+  }
+
+  // Handle token_gated using the new driver system
+  if (source.type === "token_gated" && source.mode === "simple") {
+    const simpleConfig = source.config as any; // TokenGatedSimple
+    const config = convertTokenGatedConfig(simpleConfig);
+    
+    // Create global inputs
+    const inputs: GlobalInputs = {
+      P: createConstantPriceSeries(tokenPrice, horizonMonths),
+      S_circ: createConstantSupplySeries(totalSupply, horizonMonths),
+    };
+    
+    // Compute token-gated driver outputs
+    const outputs = computeTokenGatedDriver(config, inputs, horizonMonths);
+    
+    // Convert driver outputs to DemandDataPoint format
+    for (let month = 0; month <= horizonMonths; month++) {
+      const buy = outputs.buy_tokens[month] || 0;
+      const hold = outputs.hold_tokens[month] || 0;
+      
+      // Total tokens = hold requirement
+      const tokens = hold;
+      const usd = tokens * (inputs.P[month] || tokenPrice);
+      
+      series.push({
+        month,
+        tokens,
+        usd,
+        buy_tokens: buy,
+        hold_tokens: hold,
+        spend_tokens: outputs.spend_tokens[month] || 0,
+        burn_tokens: outputs.burn_tokens[month] || 0,
+        sell_tokens: outputs.sell_tokens[month] || 0,
+        debug: outputs.debug[month],
+      });
+    }
+    
+    return series;
+  }
+
+  // Handle gas using the new driver system
+  if (source.type === "gas" && source.mode === "simple") {
+    const simpleConfig = source.config as any; // GasSimple
+    const config = convertGasConfig(simpleConfig);
+    
+    // Create global inputs
+    const inputs: GlobalInputs = {
+      P: createConstantPriceSeries(tokenPrice, horizonMonths),
+      S_circ: createConstantSupplySeries(totalSupply, horizonMonths),
+    };
+    
+    // Compute gas driver outputs
+    const outputs = computeGasDriver(config, inputs, horizonMonths);
+    
+    // Convert driver outputs to DemandDataPoint format
+    for (let month = 0; month <= horizonMonths; month++) {
+      const spend = outputs.spend_tokens[month] || 0;
+      const burn = outputs.burn_tokens[month] || 0;
+      const hold = outputs.hold_tokens[month] || 0;
+      
+      // Total tokens = spend tokens (primary metric)
+      const tokens = spend;
+      const usd = tokens * (inputs.P[month] || tokenPrice);
+      
+      series.push({
+        month,
+        tokens,
+        usd,
+        buy_tokens: outputs.buy_tokens[month] || 0,
+        hold_tokens: hold,
+        spend_tokens: spend,
+        burn_tokens: burn,
+        sell_tokens: outputs.sell_tokens[month] || 0,
+        debug: outputs.debug[month],
+      });
+    }
+    
+    return series;
+  }
+
+  // Handle bonding_curve using the new driver system
+  if (source.type === "bonding_curve" && source.mode === "simple") {
+    const simpleConfig = source.config as any; // BondingCurveSimple
+    const config = convertBondingCurveConfig(simpleConfig);
+    
+    // Create global inputs
+    const inputs: GlobalInputs = {
+      P: createConstantPriceSeries(tokenPrice, horizonMonths),
+      S_circ: createConstantSupplySeries(totalSupply, horizonMonths),
+    };
+    
+    // Compute bonding curve driver outputs
+    const outputs = computeBondingCurveDriver(config, inputs, horizonMonths);
+    
+    // Convert driver outputs to DemandDataPoint format
+    for (let month = 0; month <= horizonMonths; month++) {
+      const buy = outputs.buy_tokens[month] || 0;
+      const hold = outputs.hold_tokens[month] || 0;
+      
+      // Total tokens = locked tokens
+      const tokens = hold;
+      const usd = tokens * (inputs.P[month] || tokenPrice);
+      
+      series.push({
+        month,
+        tokens,
+        usd,
+        buy_tokens: buy,
+        hold_tokens: hold,
+        spend_tokens: outputs.spend_tokens[month] || 0,
+        burn_tokens: outputs.burn_tokens[month] || 0,
+        sell_tokens: outputs.sell_tokens[month] || 0,
+        debug: outputs.debug[month],
+      });
+    }
+    
+    return series;
+  }
+
+  // Other demand sources (legacy implementation)
   for (let month = 0; month <= horizonMonths; month++) {
     let tokens = 0;
     let usd = 0;
 
     switch (source.type) {
-      case "buybacks":
-        if (source.mode === "simple") {
-          const config = source.config as any;
-          usd = config.monthlyBuybackUsd || 0;
-          tokens = tokenPrice > 0 ? usd / tokenPrice : 0;
-        }
-        break;
 
+      // Staking is now handled above using the new driver system
       case "staking":
-        if (source.mode === "simple") {
-          const config = source.config as any;
-          const stakingRatio = (config.stakingRatio || 0) / 100;
-          const apy = (config.apy || 0) / 100;
-          // Demand from staking rewards (new tokens needed to pay rewards)
-          tokens = totalSupply * stakingRatio * (apy / 12);
-          usd = tokens * tokenPrice;
-        }
+        // Legacy code removed - now uses computeStakingDriver above
         break;
 
+      // Locking is now handled above using the new driver system
       case "locking":
-        if (source.mode === "simple") {
-          const config = source.config as any;
-          const lockedPct = (config.lockedSupplyPct || 0) / 100;
-          // Demand from locked supply (removes from circulation)
-          tokens = totalSupply * lockedPct / Math.max(1, config.avgLockDuration || 12);
-          usd = tokens * tokenPrice;
-        }
+        // Legacy code removed - now uses computeLockingDriver above
         break;
 
+      // Token gated is now handled above using the new driver system
       case "token_gated":
-        if (source.mode === "simple") {
-          const config = source.config as any;
-          tokens = (config.expectedUsers || 0) * (config.costPerUser || 0);
-          usd = tokens * tokenPrice;
-        }
+        // Legacy code removed - now uses computeTokenGatedDriver above
         break;
 
+      // Payment is now handled above using the new driver system
       case "payment":
-        if (source.mode === "simple") {
-          const config = source.config as any;
-          usd = config.monthlyVolume || 0;
-          tokens = tokenPrice > 0 ? usd / tokenPrice : 0;
-        }
+        // Legacy code removed - now uses computePaymentDriver above
         break;
 
+      // Collateral is now handled above using the new driver system
       case "collateral":
-        if (source.mode === "simple") {
-          const config = source.config as any;
-          const tvl = config.projectedTvl || 0;
-          const ratio = (config.collateralizationRatio || 100) / 100;
-          usd = tvl * ratio;
-          tokens = tokenPrice > 0 ? usd / tokenPrice : 0;
-        }
+        // Legacy code removed - now uses computeCollateralDriver above
         break;
 
+      // Fee discounts is now handled above using the new driver system
       case "fee_discounts":
-        if (source.mode === "simple") {
-          const config = source.config as any;
-          const feeVolume = config.monthlyFeeVolume || 0;
-          const discountRate = (config.discountRate || 0) / 100;
-          // Users need to hold tokens to get discounts
-          usd = feeVolume * discountRate * 10; // Multiplier for holding requirement
-          tokens = tokenPrice > 0 ? usd / tokenPrice : 0;
-        }
+        // Legacy code removed - now uses computeFeeDiscountsDriver above
         break;
 
+      // Bonding curve is now handled above using the new driver system
       case "bonding_curve":
-        if (source.mode === "simple") {
-          const config = source.config as any;
-          // Liquidity locked in bonding curve
-          usd = config.initialLiquidity || 0;
-          tokens = tokenPrice > 0 ? usd / tokenPrice : 0;
-        }
+        // Legacy code removed - now uses computeBondingCurveDriver above
         break;
 
+      // Gas is now handled above using the new driver system
       case "gas":
-        if (source.mode === "simple") {
-          const config = source.config as any;
-          const txCount = config.transactionsPerMonth || 0;
-          const avgGasInTokens = 0.001; // Example: avg gas per tx
-          tokens = txCount * avgGasInTokens;
-          usd = tokens * tokenPrice;
-        }
+        // Legacy code removed - now uses computeGasDriver above
         break;
     }
 
@@ -205,9 +550,9 @@ function getSourceLabel(type: string): string {
  */
 function calculateProfitMultiplier(costBasis: number, currentPrice: number): number {
   if (costBasis <= 0) return 1.0; // No multiplier for zero cost basis
-  
+
   const profitMultiple = currentPrice / costBasis;
-  
+
   if (profitMultiple < 1) return 0.5; // Less likely to sell at loss
   if (profitMultiple < 5) return 1.0; // Normal selling
   if (profitMultiple < 20) return 1.5; // Increased selling
@@ -224,19 +569,19 @@ function calculatePriceDependentFactor(
   sensitivity: number = 0.2
 ): number {
   if (previousMonthPrice <= 0) return 1.0;
-  
+
   const priceChangeRatio = (currentMonthPrice - previousMonthPrice) / previousMonthPrice;
-  
+
   // If price increasing > 10%: increase sell pressure by 20%
   if (priceChangeRatio > 0.1) {
     return 1 + (sensitivity * 1);
   }
-  
+
   // If price decreasing > 10%: decrease sell pressure by 20%
   if (priceChangeRatio < -0.1) {
     return 1 - (sensitivity * 1);
   }
-  
+
   return 1.0; // Neutral
 }
 
@@ -414,3 +759,5 @@ export function computeNetPressure(
   };
 }
 
+
+// Note: Revenue model helpers moved to demandDrivers/buybacks.ts

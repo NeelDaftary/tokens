@@ -75,7 +75,7 @@ export default function NumberInput({
         onFocus={handleFocus}
         onBlur={handleBlur}
         placeholder={placeholder}
-        className={`rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white ${className}`}
+        className={`input-glass ${className}`}
       />
     </div>
   );

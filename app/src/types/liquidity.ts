@@ -7,14 +7,6 @@ export type MarketRegime = "Bull" | "Base" | "Bear";
 export type Volatility = "Low" | "Med" | "High";
 export type DepthBand = 25 | 50 | 100 | 200;
 export type FeasibilityStatus = "green" | "yellow" | "red";
-export type DecayFunction = "Linear" | "Exponential";
-
-export type Catalyst = {
-  day: number;
-  multiplier: number;
-  durationDays: number;
-  label?: string;
-};
 
 // V3/CLMM Band
 export type LiquidityBand = {
@@ -59,6 +51,17 @@ export type CallOptionStrikeTier = {
   strikePrice: string; // e.g. "1/4 of loan"
 };
 
+// New type for strike price tranches (Option A: Loan + Call Option)
+export type StrikeTranche = {
+  id: string;
+  loanPct: number; // % of loan assigned to this strike (should sum to 100)
+  strikeBasis: 'FixedPrice' | 'CurrentPrice' | 'TWAPMultiplier';
+  fixedPriceUsd?: number; // if FixedPrice - direct USD price
+  fixedPriceFdv?: number; // if FixedPrice - alternative: specify as FDV in USD
+  twapMultiplier?: number; // if TWAPMultiplier (e.g., 1.3 for 130%, 1.5 for 150%)
+  currentPriceMultiplier?: number; // if CurrentPrice (e.g., 1.5 for +50%, meaning 1.5x current)
+};
+
 export type DealTranche = {
   id: string;
   name: string;
@@ -84,13 +87,6 @@ export type LiquidityModel = {
   circulatingSupplyAtTge: number;
   tgeFloatPct: number;
 
-  // Volume curve
-  decayFunction: DecayFunction;
-  peakDayVolumeUsd: number;
-  decayToPct: number;
-  decayToDay: number;
-  catalysts: Catalyst[];
-
   // Venue plan
   dexPools: DexPoolPlan[];
   cexTierMonth1: { tier1: number; tier2: number; tier3: number };
@@ -99,8 +95,6 @@ export type LiquidityModel = {
   // KPI targets (Legacy global targets, prefer per-tranche for Deal)
   targets: {
     depthTargets: DepthTarget[]; // includes 25/50/100/200
-    targetSpreadBps: number;
-    targetUptimePct: number;
   };
 
   // Budgets
@@ -116,8 +110,24 @@ export type LiquidityModel = {
   // Deal model
   deal: {
     model: DealModel;
+    
+    // Option A: Loan + Call Option
+    loanAmountPct?: number; // 0.75 - 1.2% typical
+    loanTermMonths?: number; // typically 12
+    strikeTranches?: StrikeTranche[]; // new structured strike tranches
+    clientProvidesStables?: boolean; // defaults to false (MM usually provides stables)
+    monthlyFeeUsd?: number; // usually $0 for pure loan, some hybrids exist
+    
+    // Option B: Retainer / Hybrid
     retainerMonthlyUsd?: number; // For "Retainer" model
-    tranches: DealTranche[];    // For "LoanCall" model
+    assetDeploymentModel?: 'ClientFunded' | 'ProfitShare';
+    liquidityFundingStablesUsd?: number;
+    liquidityFundingTokensUsd?: number; // USD value or token amount
+    contractDurationMonths?: number;
+    profitSharePct?: number; // optional, for ProfitShare model
+    
+    // Legacy: Keep for backward compatibility
+    tranches?: DealTranche[];    // For "LoanCall" model (deprecated, use strikeTranches)
   };
 };
 
@@ -168,9 +178,26 @@ export type OptionCostScenario = {
   valueTransferred: number;
 };
 
+export type MMContractRequirements = {
+  // Option A outputs
+  tokenProvisionRequired?: number;
+  stablecoinProvisionRequired?: number;
+  strikeTrancheBreakdown?: Array<{
+    loanPct: number;
+    strikePrice: number;
+    strikeDescription: string;
+    tokens: number;
+  }>;
+  
+  // Option B outputs
+  totalRetainerCost?: number;
+  profitShareEstimate?: number;
+};
+
 export type DealComparison = {
   retainerCost90dUsd: number;
   optionCostScenarios: OptionCostScenario[];
+  mmContractRequirements?: MMContractRequirements;
 };
 
 export type SeedingReference = {
@@ -206,12 +233,6 @@ export const DEFAULT_LIQUIDITY_MODEL: LiquidityModel = {
   circulatingSupplyAtTge: 100_000_000,
   tgeFloatPct: 10,
 
-  decayFunction: "Exponential",
-  peakDayVolumeUsd: 5_000_000,
-  decayToPct: 20,
-  decayToDay: 30,
-  catalysts: [],
-
   dexPools: [
     {
       id: "pool1",
@@ -231,8 +252,6 @@ export const DEFAULT_LIQUIDITY_MODEL: LiquidityModel = {
 
   targets: {
     depthTargets: DEFAULT_DEPTH_TARGETS,
-    targetSpreadBps: 40,
-    targetUptimePct: 95,
   },
 
   budgets: {
@@ -245,6 +264,17 @@ export const DEFAULT_LIQUIDITY_MODEL: LiquidityModel = {
   deal: {
     model: "Retainer",
     retainerMonthlyUsd: 10_000,
+    assetDeploymentModel: "ClientFunded",
+    liquidityFundingStablesUsd: 120_000,
+    liquidityFundingTokensUsd: 120_000,
+    contractDurationMonths: 12,
+    // Option A defaults (for LoanCall model)
+    loanAmountPct: 1.0,
+    loanTermMonths: 12,
+    strikeTranches: [],
+    clientProvidesStables: false,
+    monthlyFeeUsd: 0,
+    // Legacy tranches kept for backward compatibility
     tranches: [
       {
         id: "tranche1",

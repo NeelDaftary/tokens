@@ -85,7 +85,7 @@ export default function StakingTab() {
       </header>
 
       {/* Archetype Selector */}
-      <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+      <section className="glass-card p-5">
         <h3 className="mb-3 text-sm font-semibold text-white">Staking Archetype</h3>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {(["consensus", "defi", "liquid_staking", "restaking", "ve_governance"] as StakingArchetype[]).map(
@@ -119,7 +119,7 @@ export default function StakingTab() {
       </section>
 
       {/* Preset Selector */}
-      <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+      <section className="glass-card p-5">
         <h3 className="mb-3 text-sm font-semibold text-white">Load Preset</h3>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {stakingPresets.map((preset) => (
@@ -142,7 +142,7 @@ export default function StakingTab() {
       {/* Input Panels */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Token & Supply */}
-        <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+        <section className="glass-card p-5">
           <h3 className="mb-3 text-sm font-semibold text-white">Token & Supply</h3>
           <div className="grid gap-3">
             <label className="flex flex-col gap-1 text-xs text-neutral-300">
@@ -151,7 +151,7 @@ export default function StakingTab() {
                 type="text"
                 value={model.tokenSymbol}
                 onChange={(e) => updateModel({ tokenSymbol: e.target.value })}
-                className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+                className="input-glass"
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-neutral-300">
@@ -160,7 +160,7 @@ export default function StakingTab() {
                 type="number"
                 value={model.totalSupply}
                 onChange={(e) => updateModel({ totalSupply: parseFloat(e.target.value) })}
-                className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+                className="input-glass"
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-neutral-300">
@@ -169,7 +169,7 @@ export default function StakingTab() {
                 type="number"
                 value={model.circulatingSupply0}
                 onChange={(e) => updateModel({ circulatingSupply0: parseFloat(e.target.value) })}
-                className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+                className="input-glass"
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-neutral-300">
@@ -179,14 +179,14 @@ export default function StakingTab() {
                 step="0.01"
                 value={model.initialPrice}
                 onChange={(e) => updateModel({ initialPrice: parseFloat(e.target.value) })}
-                className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+                className="input-glass"
               />
             </label>
           </div>
         </section>
 
         {/* Time Config */}
-        <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+        <section className="glass-card p-5">
           <h3 className="mb-3 text-sm font-semibold text-white">Time Configuration</h3>
           <div className="grid gap-3">
             <label className="flex flex-col gap-1 text-xs text-neutral-300">
@@ -194,7 +194,7 @@ export default function StakingTab() {
               <select
                 value={model.timeStep}
                 onChange={(e) => updateModel({ timeStep: e.target.value as any })}
-                className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+                className="input-glass"
               >
                 <option value="monthly">Monthly</option>
                 <option value="weekly">Weekly</option>
@@ -206,7 +206,7 @@ export default function StakingTab() {
                 type="number"
                 value={model.horizonSteps}
                 onChange={(e) => updateModel({ horizonSteps: parseInt(e.target.value) })}
-                className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+                className="input-glass"
               />
             </label>
           </div>
@@ -214,11 +214,11 @@ export default function StakingTab() {
       </div>
 
       {/* Rewards Configuration */}
-      <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+      <section className="glass-card p-5">
         <h3 className="mb-3 text-sm font-semibold text-white">Rewards Sources</h3>
         <div className="grid gap-4 md:grid-cols-2">
           {/* Inflation */}
-          <div className="rounded border border-neutral-700 bg-neutral-950 p-3">
+          <div className="glass-surface p-4">
             <div className="mb-2 flex items-center gap-2">
               <input
                 type="checkbox"
@@ -244,7 +244,7 @@ export default function StakingTab() {
                         parseFloat(e.target.value) / 100
                       )
                     }
-                    className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-white"
+                    className="input-glass text-sm"
                   />
                 </label>
                 <label className="flex flex-col gap-1 text-xs text-neutral-300">
@@ -259,7 +259,7 @@ export default function StakingTab() {
                         parseFloat(e.target.value) / 100
                       )
                     }
-                    className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-white"
+                    className="input-glass text-sm"
                   />
                 </label>
               </div>
@@ -267,7 +267,7 @@ export default function StakingTab() {
           </div>
 
           {/* Fees */}
-          <div className="rounded border border-neutral-700 bg-neutral-950 p-3">
+          <div className="glass-surface p-4">
             <div className="mb-2 flex items-center gap-2">
               <input
                 type="checkbox"
@@ -289,7 +289,7 @@ export default function StakingTab() {
                     onChange={(e) =>
                       updateModelNested("rewards.fees.feesPerStep", parseFloat(e.target.value))
                     }
-                    className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-white"
+                    className="input-glass text-sm"
                   />
                 </label>
                 <label className="flex flex-col gap-1 text-xs text-neutral-300">
@@ -304,7 +304,7 @@ export default function StakingTab() {
                         parseFloat(e.target.value) / 100
                       )
                     }
-                    className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-white"
+                    className="input-glass text-sm"
                   />
                 </label>
               </div>
@@ -314,7 +314,7 @@ export default function StakingTab() {
       </section>
 
       {/* Staking Mechanics */}
-      <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+      <section className="glass-card p-5">
         <h3 className="mb-3 text-sm font-semibold text-white">Staking Mechanics</h3>
         <div className="grid gap-3 md:grid-cols-3">
           <label className="flex flex-col gap-1 text-xs text-neutral-300">
@@ -325,7 +325,7 @@ export default function StakingTab() {
               onChange={(e) =>
                 updateModelNested("staking.unbondingSteps", parseInt(e.target.value))
               }
-              className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+              className="input-glass"
             />
           </label>
           <label className="flex flex-col gap-1 text-xs text-neutral-300">
@@ -337,7 +337,7 @@ export default function StakingTab() {
               onChange={(e) =>
                 updateModelNested("staking.operatorCommissionPct", parseFloat(e.target.value) / 100)
               }
-              className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+              className="input-glass"
             />
           </label>
           <label className="flex flex-col gap-1 text-xs text-neutral-300">
@@ -349,14 +349,14 @@ export default function StakingTab() {
               onChange={(e) =>
                 updateModelNested("staking.maxStakePctOfSupply", parseFloat(e.target.value) / 100)
               }
-              className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+              className="input-glass"
             />
           </label>
         </div>
       </section>
 
       {/* Demand Model */}
-      <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+      <section className="glass-card p-5">
         <h3 className="mb-3 text-sm font-semibold text-white">Demand Model</h3>
         <div className="grid gap-3 md:grid-cols-3">
           <label className="flex flex-col gap-1 text-xs text-neutral-300">
@@ -368,7 +368,7 @@ export default function StakingTab() {
               onChange={(e) =>
                 updateModelNested("demand.opportunityCostAnnual", parseFloat(e.target.value) / 100)
               }
-              className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+              className="input-glass"
             />
           </label>
           <label className="flex flex-col gap-1 text-xs text-neutral-300">
@@ -378,7 +378,7 @@ export default function StakingTab() {
               onChange={(e) =>
                 updateModelNested("demand.elasticityPreset", e.target.value as ElasticityPreset)
               }
-              className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+              className="input-glass"
             >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
@@ -395,7 +395,7 @@ export default function StakingTab() {
               onChange={(e) =>
                 updateModelNested("demand.baseParticipation", parseFloat(e.target.value) / 100)
               }
-              className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+              className="input-glass"
             />
           </label>
           <label className="flex flex-col gap-1 text-xs text-neutral-300">
@@ -407,7 +407,7 @@ export default function StakingTab() {
               onChange={(e) =>
                 updateModelNested("demand.maxParticipation", parseFloat(e.target.value) / 100)
               }
-              className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+              className="input-glass"
             />
           </label>
         </div>
@@ -416,14 +416,14 @@ export default function StakingTab() {
       {/* Advanced Mode Toggle */}
       <button
         onClick={() => setShowAdvanced(!showAdvanced)}
-        className="self-start rounded border border-neutral-700 bg-neutral-800 px-4 py-2 text-sm text-white hover:bg-neutral-750"
+        className="btn-secondary btn-sm"
       >
         {showAdvanced ? "Hide" : "Show"} Advanced Settings
       </button>
 
       {/* Advanced Settings */}
       {showAdvanced && (
-        <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+        <section className="glass-card p-5">
           <h3 className="mb-3 text-sm font-semibold text-white">Advanced Risk Settings</h3>
           <div className="grid gap-3 md:grid-cols-3">
             <label className="flex flex-col gap-1 text-xs text-neutral-300">
@@ -435,7 +435,7 @@ export default function StakingTab() {
                 onChange={(e) =>
                   updateModelNested("risk.slashProbAnnual", parseFloat(e.target.value) / 100)
                 }
-                className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+                className="input-glass"
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-neutral-300">
@@ -447,7 +447,7 @@ export default function StakingTab() {
                 onChange={(e) =>
                   updateModelNested("risk.slashSeverityPct", parseFloat(e.target.value) / 100)
                 }
-                className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+                className="input-glass"
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-neutral-300">
@@ -459,7 +459,7 @@ export default function StakingTab() {
                 onChange={(e) =>
                   updateModelNested("risk.smartContractRiskAnnual", parseFloat(e.target.value) / 100)
                 }
-                className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+                className="input-glass"
               />
             </label>
           </div>
@@ -470,10 +470,10 @@ export default function StakingTab() {
       {outputs && (
         <>
           {/* KPI Cards */}
-          <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+          <section className="glass-card p-5">
             <h3 className="mb-4 text-sm font-semibold text-white">Key Metrics</h3>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+              <div className="glass-surface p-4">
                 <div className="text-xs uppercase text-neutral-500">Staking Ratio</div>
                 <div className="mt-1 text-2xl font-bold text-blue-400">
                   {fmtPct(outputs.metadata.finalStakingRatio)}
@@ -481,7 +481,7 @@ export default function StakingTab() {
                 <div className="mt-1 text-xs text-neutral-400">of circulating supply</div>
               </div>
 
-              <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+              <div className="glass-surface p-4">
                 <div className="text-xs uppercase text-neutral-500">Avg Net APR</div>
                 <div className="mt-1 text-2xl font-bold text-green-400">
                   {fmtPct(outputs.metadata.avgNetAPR)}
@@ -489,7 +489,7 @@ export default function StakingTab() {
                 <div className="mt-1 text-xs text-neutral-400">after all costs</div>
               </div>
 
-              <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+              <div className="glass-surface p-4">
                 <div className="text-xs uppercase text-neutral-500">Stake Value</div>
                 <div className="mt-1 text-2xl font-bold text-white">
                   ${(outputs.metadata.totalStakeValueUSD / 1_000_000).toFixed(1)}M
@@ -497,7 +497,7 @@ export default function StakingTab() {
                 <div className="mt-1 text-xs text-neutral-400">USD at horizon end</div>
               </div>
 
-              <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+              <div className="glass-surface p-4">
                 <div className="text-xs uppercase text-neutral-500">Real Yield</div>
                 <div className="mt-1 text-2xl font-bold text-yellow-400">
                   {outputs.metadata.avgFeeCoverage.toFixed(1)}%
@@ -508,9 +508,9 @@ export default function StakingTab() {
           </section>
 
           {/* Charts */}
-          <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+          <section className="glass-card p-5">
             <h3 className="mb-4 text-sm font-semibold text-white">Staking Ratio Over Time</h3>
-            <div className="h-[20rem] rounded border border-neutral-800 bg-neutral-950 p-4">
+            <div className="h-[20rem] glass-surface p-4">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={outputs.steps}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -555,9 +555,9 @@ export default function StakingTab() {
           </section>
 
           {/* APR Chart */}
-          <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+          <section className="glass-card p-5">
             <h3 className="mb-4 text-sm font-semibold text-white">Gross vs Net APR</h3>
-            <div className="h-[20rem] rounded border border-neutral-800 bg-neutral-950 p-4">
+            <div className="h-[20rem] glass-surface p-4">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={outputs.steps}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -602,12 +602,12 @@ export default function StakingTab() {
 
           {/* Cohorts Table */}
           {outputs.cohorts.length > 0 && (
-            <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+            <section className="glass-card p-5">
               <h3 className="mb-4 text-sm font-semibold text-white">Cohort Yields</h3>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-neutral-700 text-left text-xs text-neutral-400">
+                    <tr className="border-b border-white/[0.08] text-left text-xs text-slate-400">
                       <th className="pb-2">Cohort</th>
                       <th className="pb-2">Net APR</th>
                       <th className="pb-2">Participation</th>
@@ -615,7 +615,7 @@ export default function StakingTab() {
                   </thead>
                   <tbody>
                     {outputs.cohorts.map((cohort, idx) => (
-                      <tr key={idx} className="border-b border-neutral-800 text-sm">
+                      <tr key={idx} className="border-b border-white/[0.06] text-sm">
                         <td className="py-2 text-white">{cohort.cohort}</td>
                         <td className="py-2 text-green-400">{fmtPct(cohort.netAPR)}</td>
                         <td className="py-2 text-neutral-300">
@@ -630,7 +630,7 @@ export default function StakingTab() {
           )}
 
           {/* Stress Tests */}
-          <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+          <section className="glass-card p-5">
             <h3 className="mb-4 text-sm font-semibold text-white">Stress Tests</h3>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {(["rate_hike", "fee_drawdown", "price_crash", "slash_event"] as const).map(
@@ -647,7 +647,7 @@ export default function StakingTab() {
                           `Security Budget Δ: ${fmtPct(result.securityBudgetReduction)}`
                       );
                     }}
-                    className="rounded border border-neutral-700 bg-neutral-800 px-4 py-3 text-sm text-white hover:bg-neutral-750"
+                    className="btn-primary"
                   >
                     {testType.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
                   </button>

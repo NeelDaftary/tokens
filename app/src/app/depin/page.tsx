@@ -171,14 +171,14 @@ export default function DePINPage() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-neutral-950 text-neutral-50">
+      <div className="min-h-screen bg-[#06080D] text-slate-50">
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-10">
         {/* Header */}
         <header className="flex flex-col gap-2">
           <div className="flex items-center gap-3">
             <a
               href="/"
-              className="rounded border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-xs font-medium text-neutral-300 transition-colors hover:bg-neutral-750"
+              className="btn-ghost text-xs"
             >
               ← Back to Toolkit
             </a>
@@ -193,7 +193,7 @@ export default function DePINPage() {
         </header>
 
         {/* Scenario Selector */}
-        <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+        <section className="glass-card p-5">
           <h2 className="mb-3 text-sm font-semibold text-white">Load Preset Scenario</h2>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {DEPIN_SCENARIOS.map((scenario) => (
@@ -204,7 +204,7 @@ export default function DePINPage() {
                   config.demandType === scenario.config.demandType &&
                   config.macroCondition === scenario.config.macroCondition
                     ? "border-blue-500 bg-blue-500/10"
-                    : "border-neutral-700 bg-neutral-800 hover:border-neutral-600"
+                    : "border-white/[0.1] bg-[rgba(15,20,28,0.5)] hover:border-cyan-500/30"
                 }`}
               >
                 <div className="font-medium text-white">{scenario.name}</div>
@@ -244,7 +244,7 @@ export default function DePINPage() {
               <select
                 value={config.demandType}
                 onChange={(e) => setConfig({ ...config, demandType: e.target.value as any })}
-                className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+                className="input-glass"
               >
                 {Object.entries(DEMAND_PRESETS).map(([key, preset]) => (
                   <option key={key} value={key}>{preset.name}</option>
@@ -271,7 +271,7 @@ export default function DePINPage() {
               <select
                 value={config.macroCondition}
                 onChange={(e) => setConfig({ ...config, macroCondition: e.target.value as any })}
-                className="rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-white"
+                className="input-glass"
               >
                 {Object.entries(MACRO_PRESETS).map(([key, preset]) => (
                   <option key={key} value={key}>{preset.name}</option>
@@ -372,7 +372,7 @@ export default function DePINPage() {
             disabled={isRunning}
             className={`relative rounded border px-6 py-3 font-medium transition-colors ${
               isRunning
-                ? "border-neutral-700 bg-neutral-800 text-neutral-500"
+                ? "border-white/[0.06] bg-[rgba(15,20,28,0.3)] text-slate-500"
                 : "border-blue-600 bg-blue-600 text-white hover:bg-blue-700"
             }`}
           >
@@ -393,13 +393,13 @@ export default function DePINPage() {
             <>
               <button
                 onClick={handleExportJSON}
-                className="rounded border border-neutral-700 bg-neutral-800 px-4 py-3 text-sm font-medium text-white hover:bg-neutral-750"
+                className="btn-primary"
               >
                 Export JSON
               </button>
               <button
                 onClick={handleExportCSV}
-                className="rounded border border-neutral-700 bg-neutral-800 px-4 py-3 text-sm font-medium text-white hover:bg-neutral-750"
+                className="btn-primary"
               >
                 Export CSV
               </button>
@@ -460,7 +460,7 @@ export default function DePINPage() {
 
         {/* No Results Yet */}
         {!result && !isRunning && errors.length === 0 && (
-          <div className="rounded-lg border border-neutral-700 bg-neutral-800/50 p-8 text-center">
+          <div className="glass-surface p-8 text-center">
             <div className="mx-auto mb-3 h-12 w-12 text-neutral-600">
               <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -477,7 +477,7 @@ export default function DePINPage() {
         {result && result.aggregate && result.aggregate.length > 0 && (
           <>
             {/* Metadata */}
-            <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+            <section className="glass-card p-5">
               <h2 className="mb-3 text-sm font-semibold text-white">Simulation Metadata</h2>
               <div className="grid gap-2 text-sm md:grid-cols-4">
                 <div>

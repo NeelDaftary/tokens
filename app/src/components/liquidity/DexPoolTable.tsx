@@ -71,7 +71,7 @@ export default function DexPoolTable({ pools, onChange }: Props) {
       <div className="flex items-center justify-between">
         <button
           onClick={handleAdd}
-          className="rounded border border-neutral-700 px-3 py-1.5 text-sm text-white hover:bg-neutral-800"
+          className="btn-secondary btn-sm"
         >
           + Add pool
         </button>
@@ -86,7 +86,7 @@ export default function DexPoolTable({ pools, onChange }: Props) {
       </div>
 
       {pools.length === 0 && (
-        <div className="rounded-lg border border-dashed border-neutral-700 p-8 text-center text-sm text-neutral-400">
+        <div className="rounded-xl border border-dashed border-white/[0.1] p-8 text-center text-sm text-slate-400">
           No DEX pools yet. Click "+ Add pool" to get started.
         </div>
       )}
@@ -95,7 +95,7 @@ export default function DexPoolTable({ pools, onChange }: Props) {
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-xs text-white">
             <thead>
-              <tr className="border-b border-neutral-800 text-neutral-300">
+              <tr className="border-b border-white/[0.08] text-slate-300">
                 <th className="px-2 py-2">Actions</th>
                 <th className="px-2 py-2">Pool Type</th>
                 <th className="px-2 py-2">Chain</th>
@@ -108,7 +108,7 @@ export default function DexPoolTable({ pools, onChange }: Props) {
             <tbody>
               {pools.map((pool, idx) => (
                 <>
-                  <tr key={pool.id} className="border-b border-neutral-800 bg-neutral-900/30">
+                  <tr key={pool.id} className="border-b border-white/[0.06] bg-[rgba(15,20,28,0.3)]">
                     <td className="px-2 py-2">
                       <button
                         onClick={() => handleRemove(idx)}
@@ -123,7 +123,7 @@ export default function DexPoolTable({ pools, onChange }: Props) {
                         onChange={(e) =>
                           handleChange(idx, "poolType", e.target.value)
                         }
-                        className="rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
+                        className="input-glass text-sm"
                       >
                         {POOL_TYPES.map((type) => (
                           <option key={type} value={type}>
@@ -138,7 +138,7 @@ export default function DexPoolTable({ pools, onChange }: Props) {
                         onChange={(e) =>
                           handleChange(idx, "chain", e.target.value)
                         }
-                        className="rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
+                        className="input-glass text-sm"
                       >
                         <option value="EVM">EVM</option>
                         <option value="Solana">Solana</option>
@@ -150,7 +150,7 @@ export default function DexPoolTable({ pools, onChange }: Props) {
                         onChange={(e) =>
                           handleChange(idx, "quoteAssetType", e.target.value)
                         }
-                        className="rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
+                        className="input-glass text-sm"
                       >
                         {QUOTE_ASSETS.map((asset) => (
                           <option key={asset} value={asset}>
@@ -170,7 +170,7 @@ export default function DexPoolTable({ pools, onChange }: Props) {
                             parseFloat(e.target.value) || 0
                           )
                         }
-                        className="w-16 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
+                        className="w-16 input-glass text-sm"
                         placeholder="0"
                       />
                     </td>
@@ -181,7 +181,7 @@ export default function DexPoolTable({ pools, onChange }: Props) {
                         onChange={(e) =>
                           handleChange(idx, "primaryPool", e.target.checked)
                         }
-                        className="h-4 w-4 rounded border-neutral-700 bg-neutral-800 text-blue-500"
+                        className="h-4 w-4 rounded border-white/[0.1] bg-[rgba(15,20,28,0.5)] text-cyan-400 accent-cyan-400"
                       />
                     </td>
                     <td className="px-2 py-2">
@@ -194,8 +194,8 @@ export default function DexPoolTable({ pools, onChange }: Props) {
                     </td>
                   </tr>
                   {expandedPoolId === pool.id && (
-                    <tr className="bg-neutral-900/50">
-                      <td colSpan={7} className="p-4 border-b border-neutral-800">
+                    <tr className="bg-[rgba(15,20,28,0.5)]">
+                      <td colSpan={7} className="p-4 border-b border-white/[0.06]">
 
                         {/* V2 CONFIG */}
                         {pool.poolType === "V2" && (
@@ -208,7 +208,7 @@ export default function DexPoolTable({ pools, onChange }: Props) {
                                   type="number"
                                   value={pool.slippageBps || 50}
                                   onChange={(e) => handleChange(idx, "slippageBps", parseInt(e.target.value))}
-                                  className="rounded border border-neutral-700 bg-neutral-800 px-2 py-1 text-sm text-white w-32"
+                                  className="input-glass text-sm w-32"
                                 />
                               </label>
                               <label className="flex flex-col gap-1">
@@ -217,7 +217,7 @@ export default function DexPoolTable({ pools, onChange }: Props) {
                                   type="number"
                                   value={pool.transactionSizeUsd || 10000}
                                   onChange={(e) => handleChange(idx, "transactionSizeUsd", parseInt(e.target.value))}
-                                  className="rounded border border-neutral-700 bg-neutral-800 px-2 py-1 text-sm text-white w-32"
+                                  className="input-glass text-sm w-32"
                                 />
                               </label>
                             </div>
@@ -228,7 +228,7 @@ export default function DexPoolTable({ pools, onChange }: Props) {
                                 step="0.01"
                                 value={pool.lpFeePct !== undefined ? pool.lpFeePct * 100 : 0.3}
                                 onChange={(e) => handleChange(idx, "lpFeePct", parseFloat(e.target.value) / 100)}
-                                className="rounded border border-neutral-700 bg-neutral-800 px-2 py-1 text-sm text-white w-24"
+                                className="input-glass text-sm w-24"
                               />
                             </label>
 
@@ -264,7 +264,7 @@ export default function DexPoolTable({ pools, onChange }: Props) {
                                       newBands[bIdx].minPrice = parseFloat(e.target.value);
                                       handleBandChange(idx, newBands);
                                     }}
-                                    className="w-16 rounded border border-neutral-700 bg-neutral-800 px-1 py-0.5 text-white"
+                                    className="w-16 input-glass text-sm"
                                   />
                                   <span>to</span>
                                   <input
@@ -275,7 +275,7 @@ export default function DexPoolTable({ pools, onChange }: Props) {
                                       newBands[bIdx].maxPrice = parseFloat(e.target.value);
                                       handleBandChange(idx, newBands);
                                     }}
-                                    className="w-16 rounded border border-neutral-700 bg-neutral-800 px-1 py-0.5 text-white"
+                                    className="w-16 input-glass text-sm"
                                   />
                                   <span>Price</span>
                                   <span>| Depth: $</span>

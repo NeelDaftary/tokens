@@ -1,7 +1,8 @@
 "use client";
 
 import DealTrancheEditor from "./liquidity/DealTrancheEditor";
-import VolumeDecayChart from "./liquidity/VolumeDecayChart";
+import LoanCallEditor from "./liquidity/LoanCallEditor";
+import RetainerHybridEditor from "./liquidity/RetainerHybridEditor";
 
 
 import { useState, useMemo } from "react";
@@ -112,7 +113,7 @@ export default function LiquidityTab({
       />
 
       {/* Step content */}
-      <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+      <div className="glass-card p-6">
         {currentStep === 0 && <StepMode model={model} updateModel={updateModel} />}
         {currentStep === 1 && <StepLaunch model={model} updateModel={updateModel} />}
         {currentStep === 2 && <StepBudgets model={model} updateModel={updateModel} />}
@@ -206,13 +207,13 @@ function StepLaunch({
             onChange={(e) =>
               updateModel({ tgeFloatPct: parseFloat(e.target.value) || 0 })
             }
-            className="rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white"
+            className="input-glass"
             placeholder="10"
           />
         </label>
       </div>
 
-      <div className="rounded-lg border border-neutral-700 bg-neutral-800/50 p-4">
+      <div className="glass-card p-4">
         <div className="text-sm font-medium text-neutral-300">
           Implied TGE Price:{" "}
           <span className="text-blue-400">
@@ -220,78 +221,6 @@ function StepLaunch({
           </span>
         </div>
       </div>
-
-      <div>
-        <h3 className="mb-3 text-lg font-semibold text-white">Volume Curve</h3>
-
-        {/* Toggle for Decay Function */}
-        <div className="mb-6 flex gap-2 rounded-lg bg-neutral-950 p-1 border border-neutral-800 w-fit">
-          <button
-            onClick={() => updateModel({ decayFunction: "Linear" })}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${model.decayFunction === "Linear"
-              ? "bg-neutral-800 text-white shadow-sm border border-neutral-700"
-              : "text-neutral-400 hover:text-neutral-200"
-              }`}
-          >
-            Linear Decay
-          </button>
-          <button
-            onClick={() => updateModel({ decayFunction: "Exponential" })}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${model.decayFunction === "Exponential" // Default
-              ? "bg-neutral-800 text-white shadow-sm border border-neutral-700"
-              : "text-neutral-400 hover:text-neutral-200"
-              }`}
-          >
-            Exponential Decay
-          </button>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="space-y-4">
-            <NumberInput
-              label="Peak Day Volume (USD)"
-              value={model.peakDayVolumeUsd}
-              onChange={(value) => updateModel({ peakDayVolumeUsd: value })}
-              placeholder="5,000,000"
-            />
-
-            <label className="flex flex-col gap-2">
-              <span className="text-sm font-medium text-neutral-300">
-                Decay to % (of peak)
-              </span>
-              <input
-                type="number"
-                value={model.decayToPct || ""}
-                onChange={(e) =>
-                  updateModel({ decayToPct: parseFloat(e.target.value) || 0 })
-                }
-                className="rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white"
-                placeholder="20"
-              />
-            </label>
-
-            <label className="flex flex-col gap-2">
-              <span className="text-sm font-medium text-neutral-300">
-                Decay to Day
-              </span>
-              <input
-                type="number"
-                value={model.decayToDay || ""}
-                onChange={(e) =>
-                  updateModel({ decayToDay: parseInt(e.target.value) || 0 })
-                }
-                className="rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white"
-                placeholder="30"
-              />
-            </label>
-          </div>
-
-          <div className="bg-neutral-950 rounded-lg p-4 border border-neutral-800 h-64">
-            <VolumeDecayChart model={model} />
-          </div>
-        </div>
-      </div>
-
 
     </div>
   );
@@ -324,7 +253,7 @@ function StepVenues({
         </p>
         <div className="grid gap-6 md:grid-cols-3">
           {/* Tier 1 */}
-          <div className="rounded-lg border border-neutral-800 bg-neutral-900/50 p-4">
+          <div className="glass-surface p-4">
             <div className="flex justify-between items-center mb-2">
               <span className="font-semibold text-white">Tier 1</span>
               <span className="text-xs text-neutral-500">Binance, Coinbase</span>
@@ -338,14 +267,14 @@ function StepVenues({
                 onChange={(e) => updateModel({
                   cexTierMonth1: { ...model.cexTierMonth1, tier1: Math.max(0, parseInt(e.target.value) || 0) }
                 })}
-                className="w-full rounded border border-neutral-700 bg-neutral-950 px-2 py-1 text-sm text-white"
+                className="input-glass text-sm"
               />
             </label>
             <div className="mt-4 text-xs text-blue-400">100% Liquidity Depth</div>
           </div>
 
           {/* Tier 2 */}
-          <div className="rounded-lg border border-neutral-800 bg-neutral-900/50 p-4">
+          <div className="glass-surface p-4">
             <div className="flex justify-between items-center mb-2">
               <span className="font-semibold text-white">Tier 2</span>
               <span className="text-xs text-neutral-500">Bybit, OKX, Kraken</span>
@@ -359,7 +288,7 @@ function StepVenues({
                 onChange={(e) => updateModel({
                   cexTierMonth1: { ...model.cexTierMonth1, tier2: Math.max(0, parseInt(e.target.value) || 0) }
                 })}
-                className="w-full rounded border border-neutral-700 bg-neutral-950 px-2 py-1 text-sm text-white"
+                className="input-glass text-sm"
               />
             </label>
 
@@ -378,14 +307,14 @@ function StepVenues({
                   onChange={(e) => updateModel({
                     cexLiquidityFractions: { ...model.cexLiquidityFractions, tier2: parseInt(e.target.value) / 100 }
                   })}
-                  className="w-full h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer"
+                  className="w-full h-1.5 bg-white/[0.1] rounded-lg appearance-none cursor-pointer accent-cyan-400"
                 />
               </div>
             )}
           </div>
 
           {/* Tier 3 */}
-          <div className="rounded-lg border border-neutral-800 bg-neutral-900/50 p-4">
+          <div className="glass-surface p-4">
             <div className="flex justify-between items-center mb-2">
               <span className="font-semibold text-white">Tier 3</span>
               <span className="text-xs text-neutral-500">Gate, KuCoin, HTX</span>
@@ -399,7 +328,7 @@ function StepVenues({
                 onChange={(e) => updateModel({
                   cexTierMonth1: { ...model.cexTierMonth1, tier3: Math.max(0, parseInt(e.target.value) || 0) }
                 })}
-                className="w-full rounded border border-neutral-700 bg-neutral-950 px-2 py-1 text-sm text-white"
+                className="input-glass text-sm"
               />
             </label>
 
@@ -418,7 +347,7 @@ function StepVenues({
                   onChange={(e) => updateModel({
                     cexLiquidityFractions: { ...model.cexLiquidityFractions, tier3: parseInt(e.target.value) / 100 }
                   })}
-                  className="w-full h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer"
+                  className="w-full h-1.5 bg-white/[0.1] rounded-lg appearance-none cursor-pointer accent-cyan-400"
                 />
               </div>
             )}
@@ -456,47 +385,7 @@ function StepKPIs({
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <label className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-neutral-300">
-            Target Spread (bps)
-          </span>
-          <input
-            type="number"
-            value={model.targets.targetSpreadBps || ""}
-            onChange={(e) =>
-              updateModel({
-                targets: {
-                  ...model.targets,
-                  targetSpreadBps: parseInt(e.target.value) || 0,
-                },
-              })
-            }
-            className="rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white"
-            placeholder="40"
-          />
-        </label>
 
-        <label className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-neutral-300">
-            Target Uptime %
-          </span>
-          <input
-            type="number"
-            value={model.targets.targetUptimePct || ""}
-            onChange={(e) =>
-              updateModel({
-                targets: {
-                  ...model.targets,
-                  targetUptimePct: parseInt(e.target.value) || 0,
-                },
-              })
-            }
-            className="rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white"
-            placeholder="95"
-          />
-        </label>
-      </div>
     </div>
   );
 }
@@ -619,6 +508,15 @@ function StepDeal({
 }) {
   const DEAL_MODELS: DealModel[] = ["Retainer", "LoanCall"];
 
+  const handleDealUpdate = (updates: Partial<LiquidityModel["deal"]>) => {
+    updateModel({
+      deal: {
+        ...model.deal,
+        ...updates,
+      },
+    });
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold text-white">Deal Inputs</h2>
@@ -630,63 +528,39 @@ function StepDeal({
         {DEAL_MODELS.map((dealModel) => (
           <button
             key={dealModel}
-            onClick={() =>
-              updateModel({ deal: { ...model.deal, model: dealModel } })
-            }
-            className={`flex-1 rounded border px-4 py-2 text-sm font-medium transition-all ${model.deal.model === dealModel
-              ? "border-blue-500 bg-blue-500/20 text-blue-400"
-              : "border-neutral-700 bg-neutral-800 text-neutral-400 hover:border-neutral-600"
-              }`}
+            onClick={() => handleDealUpdate({ model: dealModel })}
+            className={`flex-1 rounded border px-4 py-2 text-sm font-medium transition-all ${
+              model.deal.model === dealModel
+                ? "border-blue-500 bg-blue-500/20 text-blue-400"
+                : "border-neutral-700 bg-neutral-800 text-neutral-400 hover:border-neutral-600"
+            }`}
           >
-            {dealModel === "LoanCall" ? "Loan + Call (Multi-Tranche)" : dealModel}
+            {dealModel === "LoanCall" ? "Loan + Call Option" : "Retainer / Hybrid"}
           </button>
         ))}
       </div>
 
       {model.deal.model === "Retainer" && (
-        <div className="space-y-4">
-          <div className="rounded-lg border border-blue-600/30 bg-blue-600/10 p-4 text-sm text-neutral-300">
-            <div className="font-semibold text-blue-400 mb-2">Retainer Model</div>
-            <p>Pay a fixed monthly fee to the market maker. This is the <strong>explicit cost</strong> — predictable and transparent. Market makers provide liquidity using their own inventory or borrowed tokens, and you pay them a service fee regardless of token price performance.</p>
-          </div>
-
-          <label className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-neutral-300">
-              Monthly Retainer (USD)
-            </span>
-            <p className="text-xs text-neutral-500">
-              Typical range: $5K–$25K/month depending on tier and scope
-            </p>
-            <input
-              type="number"
-              value={model.deal.retainerMonthlyUsd || ""}
-              onChange={(e) =>
-                updateModel({
-                  deal: {
-                    ...model.deal,
-                    retainerMonthlyUsd: parseFloat(e.target.value) || 0,
-                  },
-                })
-              }
-              className="rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white"
-              placeholder="10000"
-            />
-          </label>
-        </div>
+        <RetainerHybridEditor
+          retainerMonthlyUsd={model.deal.retainerMonthlyUsd || 0}
+          assetDeploymentModel={model.deal.assetDeploymentModel}
+          liquidityFundingStablesUsd={model.deal.liquidityFundingStablesUsd || 0}
+          liquidityFundingTokensUsd={model.deal.liquidityFundingTokensUsd || 0}
+          contractDurationMonths={model.deal.contractDurationMonths || 12}
+          profitSharePct={model.deal.profitSharePct || 0}
+          onChange={(updates) => handleDealUpdate(updates)}
+        />
       )}
 
       {model.deal.model === "LoanCall" && (
-        <div className="space-y-6">
-          <div className="rounded-lg border border-purple-600/30 bg-purple-600/10 p-4 text-sm text-neutral-300">
-            <div className="font-semibold text-purple-400 mb-2">Loan + Call Option Model</div>
-            <p className="mb-2">Define one or more tranches of inventory + options. Each tranche can have specific terms and KPI obligations.</p>
-          </div>
-
-          <DealTrancheEditor
-            tranches={model.deal.tranches || []}
-            onChange={(tranches) => updateModel({ deal: { ...model.deal, tranches } })}
-          />
-        </div>
+        <LoanCallEditor
+          loanAmountPct={model.deal.loanAmountPct || 1.0}
+          loanTermMonths={model.deal.loanTermMonths || 12}
+          strikeTranches={model.deal.strikeTranches || []}
+          clientProvidesStables={model.deal.clientProvidesStables || false}
+          monthlyFeeUsd={model.deal.monthlyFeeUsd || 0}
+          onChange={(updates) => handleDealUpdate(updates)}
+        />
       )}
     </div>
   );
@@ -716,7 +590,7 @@ function StepResults({
       <div>
         <h3 className="mb-4 text-lg font-semibold text-white">Required Inventory</h3>
         <div className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-lg border border-neutral-800 bg-gradient-to-br from-blue-500/10 to-transparent p-4">
+          <div className="glass-surface p-4 bg-gradient-to-br from-cyan-500/10 to-transparent">
             <div className="text-xs text-neutral-400">DEX Total</div>
             <div className="mt-2 text-xl font-semibold text-blue-400">
               {fmt(outputs.required.dex.tokenAmount)} tokens
@@ -731,18 +605,24 @@ function StepResults({
             )}
           </div>
 
-          <div className="rounded-lg border border-neutral-800 bg-gradient-to-br from-purple-500/10 to-transparent p-4">
+          <div className="glass-surface p-4 bg-gradient-to-br from-violet-500/10 to-transparent">
             <div className="text-xs text-neutral-400">CEX Total</div>
             <div className="mt-2 text-xl font-semibold text-purple-400">
               {fmt(outputs.required.cex.tokenAmount)} tokens
             </div>
-            <div className="mt-1 text-sm text-neutral-300">
-              {fmtUsd(outputs.required.cex.stableUsd)} stable
-            </div>
+            {outputs.required.cex.stableUsd > 0 ? (
+              <div className="mt-1 text-sm text-neutral-300">
+                {fmtUsd(outputs.required.cex.stableUsd)} stable
+              </div>
+            ) : (
+              <div className="mt-1 text-sm text-green-400">
+                $0 stable <span className="text-xs text-neutral-400">(MM provides)</span>
+              </div>
+            )}
           </div>
 
-          <div className="rounded-lg border border-neutral-800 bg-gradient-to-br from-green-500/10 to-transparent p-4">
-            <div className="text-xs text-neutral-400">Total Required</div>
+          <div className="glass-surface p-4 bg-gradient-to-br from-emerald-500/10 to-transparent">
+            <div className="text-xs text-neutral-400">Total Required (Your Contribution)</div>
             <div className="mt-2 text-xl font-semibold text-green-400">
               {fmt(outputs.required.total.tokenAmount)} tokens
             </div>
@@ -753,6 +633,84 @@ function StepResults({
         </div>
       </div>
 
+      {/* Deal Structure Summary */}
+      <div className="glass-surface p-4 border border-cyan-500/20">
+        <h3 className="mb-3 text-sm font-semibold text-cyan-400">
+          📋 Inventory Split Based on Your Deal Structure
+        </h3>
+        <div className="text-sm text-neutral-300 space-y-2">
+          {model.deal.model === "LoanCall" ? (
+            <>
+              <p>
+                <span className="text-white font-medium">Deal Type:</span> Loan + Call Option
+              </p>
+              <div className="grid gap-4 md:grid-cols-2 mt-3">
+                <div className="bg-blue-500/10 rounded-lg p-3 border border-blue-500/20">
+                  <div className="text-xs text-blue-400 font-medium mb-2">You Provide</div>
+                  <ul className="text-sm space-y-1">
+                    <li>• <span className="text-white">{fmt(outputs.required.dex.tokenAmount + outputs.required.cex.tokenAmount)}</span> tokens total</li>
+                    <li>• <span className="text-white">{fmtUsd(outputs.required.dex.stableUsd)}</span> stables for DEX pools</li>
+                  </ul>
+                </div>
+                <div className="bg-purple-500/10 rounded-lg p-3 border border-purple-500/20">
+                  <div className="text-xs text-purple-400 font-medium mb-2">Market Maker Provides</div>
+                  <ul className="text-sm space-y-1">
+                    <li>• Stablecoins for CEX order books</li>
+                    <li>• Active market making on CEX venues</li>
+                  </ul>
+                </div>
+              </div>
+            </>
+          ) : model.deal.assetDeploymentModel === "ClientFunded" ? (
+            <>
+              <p>
+                <span className="text-white font-medium">Deal Type:</span> Retainer (Client Funded)
+              </p>
+              <div className="grid gap-4 md:grid-cols-2 mt-3">
+                <div className="bg-blue-500/10 rounded-lg p-3 border border-blue-500/20">
+                  <div className="text-xs text-blue-400 font-medium mb-2">You Provide</div>
+                  <ul className="text-sm space-y-1">
+                    <li>• <span className="text-white">{fmt(outputs.required.total.tokenAmount)}</span> tokens total</li>
+                    <li>• <span className="text-white">{fmtUsd(outputs.required.total.stableUsd)}</span> stables total</li>
+                    <li>• Monthly retainer fee</li>
+                  </ul>
+                </div>
+                <div className="bg-purple-500/10 rounded-lg p-3 border border-purple-500/20">
+                  <div className="text-xs text-purple-400 font-medium mb-2">Market Maker Provides</div>
+                  <ul className="text-sm space-y-1">
+                    <li>• Active market making services</li>
+                    <li>• No capital contribution</li>
+                  </ul>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <p>
+                <span className="text-white font-medium">Deal Type:</span> Retainer (Profit Share)
+              </p>
+              <div className="grid gap-4 md:grid-cols-2 mt-3">
+                <div className="bg-blue-500/10 rounded-lg p-3 border border-blue-500/20">
+                  <div className="text-xs text-blue-400 font-medium mb-2">You Provide</div>
+                  <ul className="text-sm space-y-1">
+                    <li>• <span className="text-white">{fmt(outputs.required.dex.tokenAmount + outputs.required.cex.tokenAmount)}</span> tokens total</li>
+                    <li>• <span className="text-white">{fmtUsd(outputs.required.dex.stableUsd)}</span> stables for DEX pools</li>
+                    <li>• Profit share on MM returns</li>
+                  </ul>
+                </div>
+                <div className="bg-purple-500/10 rounded-lg p-3 border border-purple-500/20">
+                  <div className="text-xs text-purple-400 font-medium mb-2">Market Maker Provides</div>
+                  <ul className="text-sm space-y-1">
+                    <li>• Stablecoins for CEX order books</li>
+                    <li>• Active market making on CEX venues</li>
+                  </ul>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
       {/* DEX Per-Pool Breakdown */}
       {outputs.required.dex.perPool.length > 0 && (
         <div>
@@ -760,7 +718,7 @@ function StepResults({
           <div className="overflow-x-auto">
             <table className="min-w-full text-left text-sm text-white">
               <thead>
-                <tr className="border-b border-neutral-800 text-neutral-300">
+                <tr className="border-b border-white/[0.08] text-slate-300">
                   <th className="px-4 py-2">Pool</th>
                   <th className="px-4 py-2 text-right">Token Amount</th>
                   <th className="px-4 py-2 text-right">Stable USD</th>
@@ -769,7 +727,7 @@ function StepResults({
               </thead>
               <tbody>
                 {outputs.required.dex.perPool.map((pool) => (
-                  <tr key={pool.poolId} className="border-b border-neutral-800">
+                  <tr key={pool.poolId} className="border-b border-white/[0.06]">
                     <td className="px-4 py-2">{pool.poolLabel}</td>
                     <td className="px-4 py-2 text-right">{fmt(pool.tokenAmount)}</td>
                     <td className="px-4 py-2 text-right">{fmtUsd(pool.stableUsd)}</td>
@@ -790,7 +748,7 @@ function StepResults({
         <p className="mb-3 text-sm text-neutral-400">
           Comparison of two seeding methodologies: market-cap-scaled benchmarks vs. your specific KPI requirements.
         </p>
-        <div className="rounded-lg border border-neutral-800 bg-neutral-900/50 p-4">
+        <div className="glass-surface p-4">
           <div className="grid gap-4 md:grid-cols-3">
             <div>
               <div className="text-xs text-neutral-400">Suggested Seed %</div>
@@ -820,7 +778,7 @@ function StepResults({
               </div>
             </div>
           </div>
-          <div className="mt-4 border-t border-neutral-700 pt-4">
+          <div className="mt-4 border-t border-white/[0.08] pt-4">
             <div className="text-xs text-neutral-400">Recommended DEX Seed</div>
             <div className="mt-1 text-xl font-semibold text-blue-400">
               {fmt(outputs.seeding.recommendedTokens)} tokens
@@ -884,7 +842,7 @@ function StepResults({
       {/* Fragmentation Analysis */}
       <div>
         <h3 className="mb-4 text-lg font-semibold text-white">Fragmentation Analysis</h3>
-        <div className="rounded-lg border border-neutral-800 bg-neutral-900/50 p-4">
+        <div className="glass-surface p-4">
           <div className="flex items-center gap-4">
             <div className="flex-1">
               <div className="text-xs text-neutral-400">Fragmentation Multiplier</div>
@@ -917,12 +875,125 @@ function StepResults({
         </div>
       </div>
 
+      {/* MM Contract Requirements */}
+      {outputs.dealComparison.mmContractRequirements && (
+        <div>
+          <h3 className="mb-4 text-lg font-semibold text-white">MM Contract Requirements</h3>
+          {model.deal.model === "LoanCall" && outputs.dealComparison.mmContractRequirements.tokenProvisionRequired !== undefined && (
+            <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="glass-surface p-4 bg-gradient-to-br from-violet-500/10 to-transparent">
+                  <div className="text-xs text-neutral-400">Token Provision Required</div>
+                  <div className="mt-2 text-xl font-semibold text-purple-400">
+                    {fmt(outputs.dealComparison.mmContractRequirements.tokenProvisionRequired)} tokens
+                  </div>
+                  <div className="mt-1 text-sm text-neutral-300">
+                    {((outputs.dealComparison.mmContractRequirements.tokenProvisionRequired / model.circulatingSupplyAtTge) * 100).toFixed(2)}% of circulating supply
+                  </div>
+                </div>
+                <div className="glass-surface p-4 bg-gradient-to-br from-cyan-500/10 to-transparent">
+                  <div className="text-xs text-neutral-400">Stablecoin Provision Required</div>
+                  <div className="mt-2 text-xl font-semibold text-blue-400">
+                    {fmtUsd(outputs.dealComparison.mmContractRequirements.stablecoinProvisionRequired || 0)}
+                  </div>
+                  <div className="mt-1 text-sm text-neutral-300">
+                    {outputs.dealComparison.mmContractRequirements.stablecoinProvisionRequired === 0
+                      ? "MM provides stables (default)"
+                      : "Client provides stables"}
+                  </div>
+                </div>
+              </div>
+
+              {outputs.dealComparison.mmContractRequirements.strikeTrancheBreakdown &&
+                outputs.dealComparison.mmContractRequirements.strikeTrancheBreakdown.length > 0 && (
+                  <div className="glass-surface p-4">
+                    <h4 className="mb-3 text-sm font-semibold text-white">Strike Tranche Breakdown</h4>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full text-left text-sm text-white">
+                        <thead>
+                          <tr className="border-b border-white/[0.08] text-slate-300">
+                            <th className="px-4 py-2">% of Loan</th>
+                            <th className="px-4 py-2">Strike Description</th>
+                            <th className="px-4 py-2 text-right">Strike Price</th>
+                            <th className="px-4 py-2 text-right">Tokens</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {outputs.dealComparison.mmContractRequirements.strikeTrancheBreakdown.map((tranche, idx) => (
+                            <tr key={idx} className="border-b border-white/[0.06]">
+                              <td className="px-4 py-2">{tranche.loanPct.toFixed(1)}%</td>
+                              <td className="px-4 py-2 text-neutral-300">{tranche.strikeDescription}</td>
+                              <td className="px-4 py-2 text-right">${tranche.strikePrice.toFixed(4)}</td>
+                              <td className="px-4 py-2 text-right">{fmt(tranche.tokens)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+            </div>
+          )}
+
+          {model.deal.model === "Retainer" && (
+            <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="glass-surface p-4 bg-gradient-to-br from-cyan-500/10 to-transparent">
+                  <div className="text-xs text-neutral-400">Total Retainer Cost</div>
+                  <div className="mt-2 text-xl font-semibold text-blue-400">
+                    {fmtUsd(outputs.dealComparison.mmContractRequirements.totalRetainerCost || 0)}
+                  </div>
+                  <div className="mt-1 text-sm text-neutral-300">
+                    {model.deal.contractDurationMonths || 12} months × {fmtUsd(model.deal.retainerMonthlyUsd || 0)}/mo
+                  </div>
+                </div>
+                <div className="glass-surface p-4 bg-gradient-to-br from-violet-500/10 to-transparent">
+                  <div className="text-xs text-neutral-400">Token Provision Required</div>
+                  <div className="mt-2 text-xl font-semibold text-purple-400">
+                    {fmtUsd(outputs.dealComparison.mmContractRequirements.tokenProvisionRequired || 0)}
+                  </div>
+                  <div className="mt-1 text-sm text-neutral-300">
+                    {model.deal.assetDeploymentModel === "ProfitShare"
+                      ? "USD value or token amount"
+                      : "USD value of tokens"}
+                  </div>
+                </div>
+                <div className="glass-surface p-4 bg-gradient-to-br from-emerald-500/10 to-transparent">
+                  <div className="text-xs text-neutral-400">Stablecoin Provision Required</div>
+                  <div className="mt-2 text-xl font-semibold text-green-400">
+                    {fmtUsd(outputs.dealComparison.mmContractRequirements.stablecoinProvisionRequired || 0)}
+                  </div>
+                  <div className="mt-1 text-sm text-neutral-300">
+                    {outputs.dealComparison.mmContractRequirements.stablecoinProvisionRequired === 0
+                      ? "MM provides stables"
+                      : "Client provides stables"}
+                  </div>
+                </div>
+              </div>
+
+              {outputs.dealComparison.mmContractRequirements.profitShareEstimate !== undefined &&
+                outputs.dealComparison.mmContractRequirements.profitShareEstimate > 0 && (
+                  <div className="glass-surface p-4 bg-gradient-to-br from-amber-500/10 to-transparent">
+                    <div className="text-xs text-neutral-400">Estimated Profit Share</div>
+                    <div className="mt-2 text-xl font-semibold text-yellow-400">
+                      {fmtUsd(outputs.dealComparison.mmContractRequirements.profitShareEstimate)}
+                    </div>
+                    <div className="mt-1 text-sm text-neutral-300">
+                      {model.deal.profitSharePct || 0}% of NAV increase (estimated)
+                    </div>
+                  </div>
+                )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Deal Comparison */}
       <div>
         <h3 className="mb-4 text-lg font-semibold text-white">Deal Comparison (90 days)</h3>
         <div className="grid gap-4 md:grid-cols-2">
           {/* Retainer */}
-          <div className="rounded-lg border border-neutral-800 bg-gradient-to-br from-blue-500/10 to-transparent p-4">
+          <div className="glass-surface p-4 bg-gradient-to-br from-cyan-500/10 to-transparent">
             <div className="text-lg font-semibold text-white">Retainer Model</div>
             <div className="mt-4 text-xs text-neutral-400">Explicit Cost (90 days)</div>
             <div className="mt-1 text-2xl font-semibold text-blue-400">
@@ -934,7 +1005,7 @@ function StepResults({
           </div>
 
           {/* Loan + Call */}
-          <div className="rounded-lg border border-neutral-800 bg-gradient-to-br from-purple-500/10 to-transparent p-4">
+          <div className="glass-surface p-4 bg-gradient-to-br from-violet-500/10 to-transparent">
             <div className="text-lg font-semibold text-white">Loan + Call Model</div>
             <div className="mt-4 text-xs text-neutral-400">Option Give-Up Scenarios</div>
             <div className="mt-2 space-y-2">

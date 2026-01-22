@@ -23,7 +23,7 @@ export default function WizardNav({
     <div className="space-y-6">
       {/* Progress bar */}
       <div className="relative">
-        <div className="h-2 w-full rounded-full bg-neutral-800">
+        <div className="h-2 w-full rounded-full bg-white/[0.08]">
           <div
             className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-300"
             style={{
@@ -55,7 +55,7 @@ export default function WizardNav({
                     ? "border-blue-500 bg-blue-500 text-white"
                     : isPast
                     ? "border-green-500 bg-green-500 text-white"
-                    : "border-neutral-700 bg-neutral-900 text-neutral-500"
+                    : "border-white/[0.08] bg-[rgba(15,20,28,0.5)] text-slate-500"
                 }`}
               >
                 {isPast ? "✓" : idx + 1}
@@ -77,11 +77,11 @@ export default function WizardNav({
       </div>
 
       {/* Navigation buttons */}
-      <div className="flex items-center justify-between border-t border-neutral-800 pt-4">
+      <div className="flex items-center justify-between border-t border-white/[0.06] pt-4">
         <button
           onClick={() => onStepChange(currentStep - 1)}
           disabled={currentStep === 0}
-          className="rounded border border-neutral-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-40"
+          className="btn-secondary btn-sm disabled:cursor-not-allowed disabled:opacity-40"
         >
           ← Previous
         </button>

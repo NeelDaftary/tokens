@@ -36,7 +36,7 @@ export default function V2LiquidityHeatmap({ lpFeePct }: Props) {
     };
 
     return (
-        <div className="overflow-x-auto rounded border border-neutral-800 bg-neutral-900/50 p-4">
+        <div className="overflow-x-auto glass-surface p-4">
             <h5 className="mb-4 text-xs font-semibold text-neutral-300">
                 Estimated V2 Liquidity Requirement (TVL)
                 <span className="ml-2 font-normal text-neutral-500">
@@ -47,11 +47,11 @@ export default function V2LiquidityHeatmap({ lpFeePct }: Props) {
             <table className="w-full text-right text-[10px] sm:text-xs">
                 <thead>
                     <tr>
-                        <th className="bg-neutral-950 p-2 text-left text-neutral-400">
+                        <th className="bg-[rgba(10,14,20,0.8)] p-2 text-left text-slate-400">
                             Trade Size
                         </th>
                         {SLIPPAGES_BPS.map((bps) => (
-                            <th key={bps} className="bg-neutral-950 p-2 text-neutral-400">
+                            <th key={bps} className="bg-[rgba(10,14,20,0.8)] p-2 text-slate-400">
                                 {(bps / 100).toFixed(1)}%
                             </th>
                         ))}
@@ -59,8 +59,8 @@ export default function V2LiquidityHeatmap({ lpFeePct }: Props) {
                 </thead>
                 <tbody>
                     {TRADE_SIZES.map((size) => (
-                        <tr key={size} className="hover:bg-neutral-800/30">
-                            <td className="border-b border-neutral-800 bg-neutral-950 p-2 text-left font-medium text-blue-400">
+                        <tr key={size} className="hover:bg-white/[0.03]">
+                            <td className="border-b border-white/[0.06] bg-[rgba(10,14,20,0.8)] p-2 text-left font-medium text-cyan-400">
                                 ${size.toLocaleString()}
                             </td>
                             {SLIPPAGES_BPS.map((bps) => {
@@ -70,7 +70,7 @@ export default function V2LiquidityHeatmap({ lpFeePct }: Props) {
                                 return (
                                     <td
                                         key={bps}
-                                        className={`border-b border-neutral-800 p-2 ${getHeatmapColor(tvl)}`}
+                                        className={`border-b border-white/[0.06] p-2 ${getHeatmapColor(tvl)}`}
                                         title={`Trade: $${size}, Slip: ${(bps / 100)}% -> TVL: $${tvl.toLocaleString()}`}
                                     >
                                         {fmt(tvl)}

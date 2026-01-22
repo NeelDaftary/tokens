@@ -177,15 +177,15 @@ export default function Home() {
   useEffect(() => {
     if (demandSources.length === 0) {
       setDemandSources([
-        { id: "1", type: "buybacks", enabled: false, mode: "simple", config: { monthlyBuybackUsd: 0 } },
-        { id: "2", type: "staking", enabled: false, mode: "simple", config: { stakingRatio: 0, apy: 0 } },
-        { id: "3", type: "locking", enabled: false, mode: "simple", config: { lockedSupplyPct: 0, avgLockDuration: 0 } },
-        { id: "4", type: "token_gated", enabled: false, mode: "simple", config: { expectedUsers: 0, costPerUser: 0 } },
-        { id: "5", type: "payment", enabled: false, mode: "simple", config: { monthlyVolume: 0 } },
-        { id: "6", type: "collateral", enabled: false, mode: "simple", config: { projectedTvl: 0, collateralizationRatio: 0 } },
-        { id: "7", type: "fee_discounts", enabled: false, mode: "simple", config: { monthlyFeeVolume: 0, discountRate: 0 } },
-        { id: "8", type: "bonding_curve", enabled: false, mode: "simple", config: { initialLiquidity: 0, curveSlope: 0 } },
-        { id: "9", type: "gas", enabled: false, mode: "simple", config: { transactionsPerMonth: 0 } },
+        { id: "1", type: "buybacks", enabled: false, mode: "simple", config: { revenueModel: "target_end", buybackShare: 0, burnShare: 100, targetEndRevenue: 0, adoptionSpeed: "medium" } },
+        { id: "2", type: "staking", enabled: false, mode: "simple", config: { f_max: 0, adoptionSpeed: "medium", marketBuyShare: 50, rewardMechanism: "emissions", emissionSchedule: "medium", sellFrac: 70 } },
+        { id: "3", type: "locking", enabled: false, mode: "simple", config: { f_lock_max: 0, adoptionSpeed: "medium", lockDurationPreset: "medium", marketBuyShare: 50, enableUnlockApproximation: false } },
+        { id: "4", type: "token_gated", enabled: false, mode: "simple", config: { gatedUsers: 0, tokensRequired: 0, marketBuyShare: 50 } },
+        { id: "5", type: "payment", enabled: false, mode: "simple", config: { spendBasis: "direct", spendUSD: 0, bufferDays: 7, enablePayFeesInToken: false } },
+        { id: "6", type: "collateral", enabled: false, mode: "simple", config: { borrowUSD: 0, collateralRatio: 1.5, mcapCeilingPct: 5, marketBuyShare: 50 } },
+        { id: "7", type: "fee_discounts", enabled: false, mode: "simple", config: { approach: "manual_tier", activeUsers: 0, tiers: [{ tokensRequired: 0, userPercentage: 0 }], marketBuyShare: 50 } },
+        { id: "8", type: "bonding_curve", enabled: false, mode: "simple", config: { launchesPerMonth: 0, seedNativePerLaunch: 0, stickiness: 0, enableDecay: false, marketBuyShare: 70 } },
+        { id: "9", type: "gas", enabled: false, mode: "simple", config: { txCount: 0, feePreset: "medium", burnFrac: 0, enableWalletBuffer: false } },
       ]);
     }
   }, [demandSources.length]);
@@ -441,14 +441,14 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-50">
+    <div className="min-h-screen bg-[#06080D] text-slate-50">
       <main className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-10">
         <header className="flex flex-col gap-4">
           <h1 className="text-2xl font-semibold text-white">
             Token Design Toolkit
           </h1>
 
-          <div className="flex gap-2 border-b border-neutral-800">
+          <div className="flex gap-2 border-b border-white/[0.08]">
             <button
               onClick={() => setActiveTab("emissions")}
               className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === "emissions"
@@ -505,13 +505,13 @@ export default function Home() {
         {activeTab === "emissions" && (
           <>
             <section className="grid gap-6 md:grid-cols-4">
-              <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+              <div className="glass-card p-5">
                 <h2 className="text-sm font-semibold text-white">Project</h2>
                 <div className="mt-3 flex flex-col gap-3 text-sm">
                   <label className="flex flex-col gap-1">
                     <span className="text-neutral-200">Name</span>
                     <input
-                      className="rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white"
+                      className="input-glass"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
@@ -519,7 +519,7 @@ export default function Home() {
                   <label className="flex flex-col gap-1">
                     <span className="text-neutral-200">Token symbol</span>
                     <input
-                      className="rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white"
+                      className="input-glass"
                       value={tokenSymbol}
                       onChange={(e) => setTokenSymbol(e.target.value)}
                     />
@@ -528,7 +528,7 @@ export default function Home() {
                     <span className="text-neutral-200">Total supply</span>
                     <input
                       type="text"
-                      className="rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white"
+                      className="input-glass"
                       value={
                         unknownSupply
                           ? ""
@@ -556,7 +556,7 @@ export default function Home() {
                   <label className="flex flex-col gap-1">
                     <span className="text-neutral-200">Domain preset</span>
                     <select
-                      className="rounded border border-neutral-800 bg-neutral-950 px-3 py-2 text-white"
+                      className="input-glass"
                       value={domain}
                       onChange={(e) =>
                         setDomain(e.target.value as keyof typeof domainPresets)
@@ -570,14 +570,14 @@ export default function Home() {
                     </select>
                   </label>
                   <button
-                    className="rounded bg-blue-600 px-3 py-2 text-white transition hover:bg-blue-500 disabled:bg-neutral-500"
+                    className="btn-primary"
                     onClick={handleNormalize}
                     disabled={groups.length === 0}
                   >
                     Normalize allocations
                   </button>
                   <button
-                    className="rounded border border-neutral-700 px-3 py-2 text-sm text-white transition hover:border-neutral-500"
+                    className="btn-secondary btn-sm"
                     onClick={handleSave}
                     disabled={saving}
                   >
@@ -587,7 +587,7 @@ export default function Home() {
                     <p className="text-xs text-neutral-200">{message}</p>
                   ) : null}
 
-                  <div className="mt-6 border-t border-neutral-800 pt-4">
+                  <div className="mt-6 border-t border-white/[0.06] pt-4">
                     <div className="flex items-center justify-between">
                       <h3 className="text-xs font-semibold text-neutral-200">
                         Saved projects
@@ -607,7 +607,7 @@ export default function Home() {
                         savedProjects.map((p) => (
                           <div
                             key={p.id}
-                            className="flex items-center justify-between rounded border border-neutral-800 bg-neutral-950 px-2 py-2"
+                            className="flex items-center justify-between glass-surface px-3 py-2"
                           >
                             <div className="flex flex-col">
                               <span className="font-semibold text-white">
@@ -618,7 +618,7 @@ export default function Home() {
                               </span>
                             </div>
                             <button
-                              className="rounded border border-neutral-700 px-2 py-1 text-[11px] text-white"
+                              className="rounded-lg border border-white/[0.1] px-2 py-1 text-[11px] text-slate-200 bg-[rgba(15,20,28,0.5)]"
                               onClick={() => handleLoadProject(p)}
                             >
                               Load
@@ -631,7 +631,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm md:col-span-3">
+              <div className="glass-card p-5 md:col-span-3">
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-white">
                     Distribution groups
@@ -649,7 +649,7 @@ export default function Home() {
                 </div>
                 <div className="mt-2 flex items-center justify-between text-xs text-neutral-200">
                   <button
-                    className="rounded border border-neutral-700 px-3 py-1 text-white"
+                    className="select-glass"
                     onClick={() =>
                       setGroups((prev) => [
                         ...prev,
@@ -678,7 +678,7 @@ export default function Home() {
                 <div className="mt-3 overflow-x-auto">
                   <table className="min-w-full text-left text-xs text-white">
                     <thead>
-                      <tr className="border-b border-neutral-800 text-neutral-300">
+                      <tr className="border-b border-white/[0.08] text-slate-300">
                         <th className="px-2 py-2">Actions</th>
                         <th className="px-2 py-2">Name</th>
                         <th className="px-2 py-2">Alloc %</th>
@@ -691,7 +691,7 @@ export default function Home() {
                     </thead>
                     <tbody>
                       {groups.map((g, i) => (
-                        <tr key={i} className="border-b border-neutral-800">
+                        <tr key={i} className="border-b border-white/[0.06]">
                           <td className="px-2 py-2">
                             <button
                               className="text-red-400"
@@ -704,17 +704,19 @@ export default function Home() {
                           </td>
                           <td className="px-2 py-2">
                             <input
-                              className="w-32 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
+                              className="input-glass text-sm"
+                              style={{ width: '210px' }}
                               value={g.name}
                               onChange={(e) =>
                                 handleUpdateGroup(i, "name", e.target.value)
                               }
                             />
                           </td>
-                          <td className="px-2 py-2">
+                          <td className="px-1 py-2">
                             <input
                               type="number"
-                              className="w-20 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
+                              className="input-glass text-sm text-center"
+                              style={{ width: '65px', padding: '0.5rem 0.25rem' }}
                               value={g.allocationPct}
                               onChange={(e) =>
                                 handleUpdateGroup(
@@ -727,7 +729,7 @@ export default function Home() {
                           </td>
                           <td className="px-2 py-2">
                             <select
-                              className="rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
+                              className="input-glass text-sm"
                               value={g.category}
                               onChange={(e) =>
                                 handleUpdateGroup(i, "category", e.target.value)
@@ -740,20 +742,22 @@ export default function Home() {
                               ))}
                             </select>
                           </td>
-                          <td className="px-2 py-2">
+                          <td className="px-1 py-2">
                             <input
                               type="color"
-                              className="h-8 w-12 rounded border border-neutral-800 bg-neutral-950"
+                              className="h-8 input-glass text-sm"
+                              style={{ width: '45px' }}
                               value={g.color || COLORS[i % COLORS.length]}
                               onChange={(e) =>
                                 handleUpdateGroup(i, "color", e.target.value)
                               }
                             />
                           </td>
-                          <td className="px-2 py-2">
+                          <td className="px-1 py-2">
                             <input
                               type="number"
-                              className="w-14 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
+                              className="input-glass text-sm text-center"
+                              style={{ width: '65px', padding: '0.5rem 0.25rem' }}
                               value={g.tgeUnlockPct ?? 0}
                               onChange={(e) =>
                                 handleUpdateGroup(
@@ -764,10 +768,11 @@ export default function Home() {
                               }
                             />
                           </td>
-                          <td className="px-2 py-2">
+                          <td className="px-1 py-2">
                             <input
                               type="number"
-                              className="w-12 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
+                              className="input-glass text-sm text-center"
+                              style={{ width: '65px', padding: '0.5rem 0.25rem' }}
                               value={g.cliffMonths ?? 0}
                               onChange={(e) =>
                                 handleUpdateGroup(
@@ -778,10 +783,11 @@ export default function Home() {
                               }
                             />
                           </td>
-                          <td className="px-2 py-2">
+                          <td className="px-1 py-2">
                             <input
                               type="number"
-                              className="w-12 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-white"
+                              className="input-glass text-sm text-center"
+                              style={{ width: '65px', padding: '0.5rem 0.25rem' }}
                               value={g.vestMonths ?? 0}
                               onChange={(e) =>
                                 handleUpdateGroup(
@@ -800,7 +806,7 @@ export default function Home() {
               </div>
             </section>
 
-            <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+            <section className="glass-card p-5">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <h2 className="text-sm font-semibold text-white">Distribution Over time</h2>
                 <div className="flex items-center gap-4">
@@ -810,7 +816,7 @@ export default function Home() {
                       type="number"
                       min="12"
                       max="120"
-                      className="w-20 rounded border border-neutral-700 bg-neutral-950 px-2 py-1 text-white"
+                      className="w-20 input-glass text-sm"
                       value={horizonMonths}
                       onChange={(e) => {
                         const val = parseInt(e.target.value || "36", 10);
@@ -826,7 +832,7 @@ export default function Home() {
                 {groups.map((g, idx) => (
                   <div
                     key={g.name}
-                    className="flex items-center gap-2 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-neutral-200"
+                    className="flex items-center gap-2 glass-surface px-3 py-2 text-slate-200"
                   >
                     <span
                       className="h-3 w-3 rounded-full"
@@ -838,7 +844,7 @@ export default function Home() {
               </div>
 
               <div className="mt-4 grid gap-4 lg:grid-cols-1">
-                <div className="h-[24rem] rounded border border-neutral-800 bg-neutral-950 p-4">
+                <div className="h-[24rem] glass-surface p-4">
                   <div className="flex items-center justify-between">
                     <div className="text-xs font-semibold text-neutral-200">
                       Distribution (pie)
@@ -846,7 +852,7 @@ export default function Home() {
                     <button
                       className={`rounded px-2 py-1 text-[10px] transition ${pieChartMode === "instantaneous"
                         ? "bg-blue-600 text-white"
-                        : "border border-neutral-700 text-neutral-300"
+                        : "border border-white/[0.1] text-slate-400"
                         }`}
                       onClick={() =>
                         setPieChartMode((prev) =>
@@ -913,7 +919,7 @@ export default function Home() {
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="h-[28rem] rounded border border-neutral-800 bg-neutral-950 p-4">
+                <div className="h-[28rem] glass-surface p-4">
                   <div className="text-xs font-semibold text-neutral-200">
                     Unlocks over time (stacked cumulative, {horizonMonths} months)
                   </div>
@@ -974,7 +980,7 @@ export default function Home() {
 
         {activeTab === "demand" && (
           <>
-            <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+            <section className="glass-card p-5">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <h2 className="text-sm font-semibold text-white">Token Demand Settings</h2>
                 <div className="flex items-center gap-4">
@@ -984,7 +990,7 @@ export default function Home() {
                       type="number"
                       min="12"
                       max="120"
-                      className="w-20 rounded border border-neutral-700 bg-neutral-950 px-2 py-1 text-white"
+                      className="w-20 input-glass text-sm"
                       value={demandHorizonMonths}
                       onChange={(e) => {
                         const val = parseInt(e.target.value || "36", 10);
@@ -997,7 +1003,7 @@ export default function Home() {
                       onClick={() => setDemandUnit("tokens")}
                       className={`rounded px-3 py-1 text-xs font-medium transition ${demandUnit === "tokens"
                         ? "bg-blue-600 text-white"
-                        : "border border-neutral-700 text-neutral-300 hover:text-white"
+                        : "border border-white/[0.1] text-slate-400 hover:text-white hover:border-cyan-500/30"
                         }`}
                     >
                       Tokens
@@ -1006,7 +1012,7 @@ export default function Home() {
                       onClick={() => setDemandUnit("usd")}
                       className={`rounded px-3 py-1 text-xs font-medium transition ${demandUnit === "usd"
                         ? "bg-blue-600 text-white"
-                        : "border border-neutral-700 text-neutral-300 hover:text-white"
+                        : "border border-white/[0.1] text-slate-400 hover:text-white hover:border-cyan-500/30"
                         }`}
                     >
                       USD
@@ -1017,7 +1023,7 @@ export default function Home() {
                       onClick={() => setDemandViewMode("period")}
                       className={`rounded px-3 py-1 text-xs font-medium transition ${demandViewMode === "period"
                         ? "bg-blue-600 text-white"
-                        : "border border-neutral-700 text-neutral-300 hover:text-white"
+                        : "border border-white/[0.1] text-slate-400 hover:text-white hover:border-cyan-500/30"
                         }`}
                     >
                       Per-Period
@@ -1026,7 +1032,7 @@ export default function Home() {
                       onClick={() => setDemandViewMode("cumulative")}
                       className={`rounded px-3 py-1 text-xs font-medium transition ${demandViewMode === "cumulative"
                         ? "bg-blue-600 text-white"
-                        : "border border-neutral-700 text-neutral-300 hover:text-white"
+                        : "border border-white/[0.1] text-slate-400 hover:text-white hover:border-cyan-500/30"
                         }`}
                     >
                       Cumulative
@@ -1042,7 +1048,7 @@ export default function Home() {
               </div>
             </section>
 
-            <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+            <section className="glass-card p-5">
               <h2 className="text-sm font-semibold text-white mb-4">Demand Sources</h2>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {demandSources.map((source) => (
@@ -1064,13 +1070,13 @@ export default function Home() {
               </div>
             </section>
 
-            <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+            <section className="glass-card p-5">
               <h2 className="text-sm font-semibold text-white mb-4">
                 Token Demand Visualization ({demandViewMode === "cumulative" ? "Cumulative" : "Per-Period"})
               </h2>
 
               {demandData.bySource.length === 0 ? (
-                <div className="rounded border border-neutral-700 bg-neutral-950 p-8 text-center">
+                <div className="glass-surface p-8 text-center">
                   <p className="text-sm text-neutral-400">
                     Enable demand sources above to see the demand chart
                   </p>
@@ -1081,7 +1087,7 @@ export default function Home() {
                     {demandData.bySource.map((src, idx) => (
                       <div
                         key={src.type}
-                        className="flex items-center gap-2 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-neutral-200"
+                        className="flex items-center gap-2 glass-surface px-3 py-2 text-slate-200"
                       >
                         <span
                           className="h-3 w-3 rounded-full"
@@ -1092,7 +1098,7 @@ export default function Home() {
                     ))}
                   </div>
 
-                  <div className="h-[28rem] rounded border border-neutral-800 bg-neutral-950 p-4">
+                  <div className="h-[28rem] glass-surface p-4">
                     <ResponsiveContainer width="100%" height={410}>
                       <BarChart
                         data={demandData.totalSeries.slice(0, demandHorizonMonths + 1).map((row, idx) => {
@@ -1142,7 +1148,7 @@ export default function Home() {
                     </ResponsiveContainer>
                   </div>
 
-                  <div className="mt-4 rounded border border-neutral-800 bg-neutral-950 p-3">
+                  <div className="mt-4 glass-surface p-4">
                     <h3 className="text-xs font-semibold text-white mb-2">Summary</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs text-neutral-200">
                       <div>
@@ -1172,7 +1178,7 @@ export default function Home() {
             </section>
 
             {/* Sell Pressure Section */}
-            <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+            <section className="glass-card p-5">
               <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
                 <div>
                   <h2 className="text-sm font-semibold text-white">
@@ -1188,7 +1194,7 @@ export default function Home() {
                     type="number"
                     step="0.01"
                     min="0"
-                    className="w-24 rounded border border-neutral-700 bg-neutral-950 px-2 py-1 text-white"
+                    className="w-24 input-glass text-sm"
                     value={currentTokenPrice}
                     onChange={(e) => {
                       const val = parseFloat(e.target.value || "1");
@@ -1207,7 +1213,7 @@ export default function Home() {
             </section>
 
             {/* Sell Pressure Charts */}
-            <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+            <section className="glass-card p-5">
               <h2 className="text-sm font-semibold text-white mb-4">
                 Market Pressure Analysis
               </h2>
@@ -1228,7 +1234,7 @@ export default function Home() {
                   2. Sell Pressure (Token Sales)
                 </h3>
                 {sellPressureData.byGroup.length === 0 ? (
-                  <div className="rounded border border-neutral-700 bg-neutral-950 p-8 text-center">
+                  <div className="glass-surface p-8 text-center">
                     <p className="text-sm text-neutral-400">
                       No sell pressure data. Configure distribution groups and sell pressure settings above.
                     </p>
@@ -1239,7 +1245,7 @@ export default function Home() {
                       {sellPressureData.byGroup.map((group, idx) => (
                         <div
                           key={group.groupId}
-                          className="flex items-center gap-2 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 text-neutral-200"
+                          className="flex items-center gap-2 glass-surface px-3 py-2 text-slate-200"
                         >
                           <span
                             className="h-3 w-3 rounded-full"
@@ -1250,7 +1256,7 @@ export default function Home() {
                       ))}
                     </div>
 
-                    <div className="h-[28rem] rounded border border-neutral-800 bg-neutral-950 p-4">
+                    <div className="h-[28rem] glass-surface p-4">
                       <ResponsiveContainer width="100%" height={410}>
                         <BarChart
                           data={sellPressureData.totalSeries.slice(0, demandHorizonMonths + 1).map((row, idx) => {
@@ -1309,14 +1315,14 @@ export default function Home() {
                   3. Net Market Pressure (Demand - Sell)
                 </h3>
                 {netPressureData.series.length === 0 ? (
-                  <div className="rounded border border-neutral-700 bg-neutral-950 p-8 text-center">
+                  <div className="glass-surface p-8 text-center">
                     <p className="text-sm text-neutral-400">
                       No net pressure data available
                     </p>
                   </div>
                 ) : (
                   <>
-                    <div className="h-[28rem] rounded border border-neutral-800 bg-neutral-950 p-4">
+                    <div className="h-[28rem] glass-surface p-4">
                       <ResponsiveContainer width="100%" height={410}>
                         <BarChart
                           data={netPressureData.series.slice(0, demandHorizonMonths + 1).map((row) => ({
@@ -1366,7 +1372,7 @@ export default function Home() {
                       </ResponsiveContainer>
                     </div>
 
-                    <div className="mt-4 rounded border border-neutral-800 bg-neutral-950 p-3">
+                    <div className="mt-4 glass-surface p-4">
                       <h3 className="text-xs font-semibold text-white mb-2">Net Pressure Insights</h3>
                       <div className="grid grid-cols-2 gap-4 text-xs text-neutral-200 md:grid-cols-4">
                         <div>
@@ -1411,28 +1417,28 @@ export default function Home() {
             </section>
 
             {/* Comprehensive Summary Stats Panel */}
-            <section className="rounded-lg border border-neutral-800 bg-neutral-900 p-4 shadow-sm">
+            <section className="glass-card p-5">
               <h2 className="text-sm font-semibold text-white mb-4">
                 Market Dynamics Summary
               </h2>
 
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {/* Total Demand Card */}
-                <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+                <div className="glass-surface p-4">
                   <div className="text-xs uppercase text-neutral-500 mb-1">Total Demand</div>
                   <div className="text-lg font-bold text-green-400">{fmt(netPressureData.metadata.totalDemand)}</div>
                   <div className="text-[10px] text-neutral-500 mt-1">tokens over {demandHorizonMonths}mo</div>
                 </div>
 
                 {/* Total Sell Pressure Card */}
-                <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+                <div className="glass-surface p-4">
                   <div className="text-xs uppercase text-neutral-500 mb-1">Total Sell Pressure</div>
                   <div className="text-lg font-bold text-red-400">{fmt(netPressureData.metadata.totalSellPressure)}</div>
                   <div className="text-[10px] text-neutral-500 mt-1">tokens over {demandHorizonMonths}mo</div>
                 </div>
 
                 {/* Avg Monthly Demand Card */}
-                <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+                <div className="glass-surface p-4">
                   <div className="text-xs uppercase text-neutral-500 mb-1">Avg Monthly Demand</div>
                   <div className="text-lg font-bold text-white">
                     {fmt(netPressureData.metadata.totalDemand / (demandHorizonMonths + 1))}
@@ -1441,7 +1447,7 @@ export default function Home() {
                 </div>
 
                 {/* Avg Monthly Sell Card */}
-                <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+                <div className="glass-surface p-4">
                   <div className="text-xs uppercase text-neutral-500 mb-1">Avg Monthly Sell</div>
                   <div className="text-lg font-bold text-white">
                     {fmt(sellPressureData.metadata.avgMonthlySell)}
@@ -1450,7 +1456,7 @@ export default function Home() {
                 </div>
 
                 {/* Peak Sell Month Card */}
-                <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+                <div className="glass-surface p-4">
                   <div className="text-xs uppercase text-neutral-500 mb-1">Peak Sell Month</div>
                   <div className="text-lg font-bold text-orange-400">
                     Month {sellPressureData.metadata.peakSellMonth}
@@ -1459,7 +1465,7 @@ export default function Home() {
                 </div>
 
                 {/* Highest Risk Group Card */}
-                <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+                <div className="glass-surface p-4">
                   <div className="text-xs uppercase text-neutral-500 mb-1">Highest Risk Group</div>
                   <div className="text-sm font-bold text-white truncate">
                     {(() => {
@@ -1477,7 +1483,7 @@ export default function Home() {
                 </div>
 
                 {/* Lowest Risk Group Card */}
-                <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+                <div className="glass-surface p-4">
                   <div className="text-xs uppercase text-neutral-500 mb-1">Lowest Risk Group</div>
                   <div className="text-sm font-bold text-white truncate">
                     {(() => {
@@ -1495,7 +1501,7 @@ export default function Home() {
                 </div>
 
                 {/* Market Sentiment Score Card */}
-                <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+                <div className="glass-surface p-4">
                   <div className="text-xs uppercase text-neutral-500 mb-1">Sentiment Score</div>
                   <div className="text-lg font-bold">
                     {(() => {

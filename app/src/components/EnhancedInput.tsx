@@ -63,13 +63,13 @@ export default function EnhancedInput({
     
     if (validationState.valid) {
       return (
-        <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <svg className="w-5 h-5 text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.5)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
         </svg>
       );
     } else {
       return (
-        <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="w-5 h-5 text-red-400 drop-shadow-[0_0_6px_rgba(248,113,113,0.5)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
         </svg>
       );
@@ -77,32 +77,32 @@ export default function EnhancedInput({
   };
 
   const getBorderColor = () => {
-    if (!touched) return focused ? "border-blue-500" : "border-white/10";
-    if (validationState.valid) return focused ? "border-green-500" : "border-green-500/50";
-    return focused ? "border-red-500" : "border-red-500/50";
+    if (!touched) return focused ? "border-cyan-500/60" : "border-white/[0.08]";
+    if (validationState.valid) return focused ? "border-emerald-400/60" : "border-emerald-400/40";
+    return focused ? "border-red-400/60" : "border-red-400/40";
   };
 
-  const getShadow = () => {
+  const getGlowShadow = () => {
     if (!focused) return "";
-    if (!touched) return "shadow-[0_0_0_3px_rgba(59,130,246,0.15)]";
-    if (validationState.valid) return "shadow-[0_0_0_3px_rgba(34,197,94,0.15)]";
-    return "shadow-[0_0_0_3px_rgba(239,68,68,0.15)]";
+    if (!touched) return "shadow-[0_0_0_3px_rgba(34,211,238,0.12),0_0_20px_rgba(34,211,238,0.15)]";
+    if (validationState.valid) return "shadow-[0_0_0_3px_rgba(52,211,153,0.12),0_0_20px_rgba(52,211,153,0.15)]";
+    return "shadow-[0_0_0_3px_rgba(248,113,113,0.12),0_0_20px_rgba(248,113,113,0.15)]";
   };
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
       {/* Label */}
-      <label className="text-sm font-semibold text-white tracking-tight flex items-center gap-1.5">
+      <label className="text-sm font-semibold text-slate-200 tracking-tight flex items-center gap-2">
         {label}
-        {required && <span className="text-red-400">*</span>}
+        {required && <span className="text-cyan-400">*</span>}
         {helpText && (
           <div className="group relative">
-            <svg className="w-4 h-4 text-neutral-500 hover:text-neutral-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-4 h-4 text-slate-500 hover:text-cyan-400 cursor-help transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             {/* Tooltip */}
-            <div className="absolute left-0 top-6 z-10 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200">
-              <div className="bg-neutral-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-neutral-300 shadow-xl max-w-xs whitespace-normal">
+            <div className="absolute left-0 top-7 z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-y-0 translate-y-1">
+              <div className="glass-card px-3 py-2 text-xs text-slate-300 shadow-xl max-w-xs whitespace-normal border-cyan-500/20">
                 {helpText}
               </div>
             </div>
@@ -111,18 +111,21 @@ export default function EnhancedInput({
       </label>
 
       {/* Input Container */}
-      <div className="relative">
+      <div className="relative group">
         <div
-          className={`flex items-center border ${getBorderColor()} ${getShadow()} bg-gradient-to-br from-white/[0.02] to-transparent rounded-lg transition-all duration-200 overflow-hidden`}
-          style={{
-            boxShadow: focused 
-              ? "0 1px 3px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.05)"
-              : "0 1px 2px rgba(0,0,0,0.3)",
-          }}
+          className={`
+            flex items-center 
+            border ${getBorderColor()} ${getGlowShadow()}
+            bg-[rgba(15,20,28,0.7)] backdrop-blur-xl
+            rounded-xl 
+            transition-all duration-300 
+            overflow-hidden
+            ${focused ? 'scale-[1.01]' : ''}
+          `}
         >
           {/* Prefix */}
           {getPrefix() && (
-            <span className="pl-3 text-sm font-semibold text-neutral-500">
+            <span className="pl-4 text-sm font-semibold text-slate-500">
               {getPrefix()}
             </span>
           )}
@@ -142,7 +145,7 @@ export default function EnhancedInput({
             }}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
-            className="flex-1 px-3 py-3 bg-transparent text-white text-sm font-medium placeholder:text-neutral-600 focus:outline-none w-full"
+            className="flex-1 px-4 py-3.5 bg-transparent text-slate-100 text-sm font-medium placeholder:text-slate-600 focus:outline-none w-full"
             style={{
               appearance: "textfield",
             }}
@@ -150,18 +153,36 @@ export default function EnhancedInput({
 
           {/* Suffix */}
           {getSuffix() && (
-            <span className="pr-3 text-sm font-semibold text-neutral-500">
+            <span className="pr-4 text-sm font-semibold text-slate-500">
               {getSuffix()}
             </span>
           )}
 
-          {/* Validation Icon */}
+          {/* Validation Icon with micro-animation */}
           {touched && (
-            <div className="pr-3 flex-shrink-0 animate-in fade-in duration-200">
+            <div className="pr-4 flex-shrink-0 animate-scale-in">
               {getIcon()}
             </div>
           )}
         </div>
+
+        {/* Subtle glow effect on hover */}
+        <div 
+          className={`
+            absolute inset-0 -z-10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500
+            ${focused ? 'opacity-100' : ''}
+          `}
+          style={{
+            background: focused 
+              ? (touched 
+                  ? (validationState.valid 
+                      ? 'radial-gradient(ellipse at center, rgba(52,211,153,0.08) 0%, transparent 70%)'
+                      : 'radial-gradient(ellipse at center, rgba(248,113,113,0.08) 0%, transparent 70%)')
+                  : 'radial-gradient(ellipse at center, rgba(34,211,238,0.08) 0%, transparent 70%)')
+              : 'radial-gradient(ellipse at center, rgba(34,211,238,0.05) 0%, transparent 70%)',
+            filter: 'blur(8px)',
+          }}
+        />
 
         {/* Hide number input arrows */}
         <style jsx>{`
@@ -176,20 +197,20 @@ export default function EnhancedInput({
         `}</style>
       </div>
 
-      {/* Validation Message */}
+      {/* Validation Message with micro-animation */}
       {touched && !validationState.valid && validationState.message && (
-        <p className="text-xs text-red-400 font-medium animate-in slide-in-from-top-1 duration-200">
+        <p className="text-xs text-red-400 font-medium animate-fade-in-up flex items-center gap-1.5">
+          <span className="inline-block w-1 h-1 rounded-full bg-red-400" />
           {validationState.message}
         </p>
       )}
 
       {/* Helper text for valid state */}
       {touched && validationState.valid && min !== undefined && max !== undefined && (
-        <p className="text-xs text-neutral-500 font-medium">
+        <p className="text-xs text-slate-500 font-medium">
           Valid range: {min.toLocaleString()} - {max.toLocaleString()}
         </p>
       )}
     </div>
   );
 }
-
