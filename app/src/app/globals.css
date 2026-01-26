@@ -1,5 +1,89 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════════
+   NEURIAL GROTESK FONT FAMILY
+   ═══════════════════════════════════════════════════════════════ */
+
+@font-face {
+  font-family: 'Neurial Grotesk';
+  src: url('/fonts/NeurialGrotesk-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neurial Grotesk';
+  src: url('/fonts/NeurialGrotesk-LightItalic.woff2') format('woff2');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neurial Grotesk';
+  src: url('/fonts/NeurialGrotesk-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neurial Grotesk';
+  src: url('/fonts/NeurialGrotesk-Italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neurial Grotesk';
+  src: url('/fonts/NeurialGrotesk-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neurial Grotesk';
+  src: url('/fonts/NeurialGrotesk-MediumItalic.woff2') format('woff2');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neurial Grotesk';
+  src: url('/fonts/NeurialGrotesk-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neurial Grotesk';
+  src: url('/fonts/NeurialGrotesk-BoldItalic.woff2') format('woff2');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neurial Grotesk';
+  src: url('/fonts/NeurialGrotesk-Extrabold.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neurial Grotesk';
+  src: url('/fonts/NeurialGrotesk-ExtraboldItalic.woff2') format('woff2');
+  font-weight: 800;
+  font-style: italic;
+  font-display: swap;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -210,7 +294,7 @@ body::before {
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--bg-primary);
   background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   border: none;
@@ -263,7 +347,7 @@ body::before {
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--accent-primary);
   background: var(--glass-bg);
   backdrop-filter: blur(12px);
@@ -300,7 +384,7 @@ body::before {
   gap: 0.5rem;
   padding: 0.625rem 1rem;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 400;
   color: var(--text-secondary);
   background: transparent;
   border: 1px solid transparent;
@@ -364,7 +448,7 @@ body::before {
   width: 100%;
   padding: 0.75rem 1rem;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 400;
   color: var(--text-primary);
   background: var(--glass-bg);
   backdrop-filter: blur(12px);

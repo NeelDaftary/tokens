@@ -93,6 +93,28 @@ export function computeStakingSeries(model: StakingModel): StakingOutputs {
     // Calculate stake value in USD
     const stakeValueUSD = stakeTokens * price;
 
+    // Calculate inflation drag (dilution effect on token holders)
+    // If inflation is 10% and you're staking, the new tokens dilute everyone's share
+    // But stakers receive rewards that offset this dilution
+    // Non-stakers get diluted by: inflationRate * (1 - stakingRatio) approximately
+    // For stakers, the "real" return is their netAPR minus the dilution they'd face if not staking
+    const currentInflationRate = model.rewards.inflation.enabled 
+      ? getInflationRate(model.rewards.inflation, t) 
+      : 0;
+    
+    // Inflation drag represents how much stakers' ownership % would dilute if they didn't stake
+    // This is the "hidden cost" that makes advertised APR misleading
+    // Formula: inflationRate * (tokensToNonStakers / totalNewSupply) simplified to:
+    // inflationRate * (1 - distributionToStakersPct * stakingRatio)
+    const distributionToStakers = model.rewards.inflation.enabled 
+      ? model.rewards.inflation.distributionToStakersPct 
+      : 0;
+    const inflationDragPct = currentInflationRate * (1 - distributionToStakers * stakingRatio);
+    
+    // Real APY = Net APR - Inflation Drag
+    // This shows the actual increase in ownership percentage, not just token count
+    const realAPY = netAPR - inflationDragPct;
+
     steps.push({
       t,
       price,
@@ -104,6 +126,8 @@ export function computeStakingSeries(model: StakingModel): StakingOutputs {
       rewardsToStakers,
       grossAPR,
       netAPR,
+      realAPY,
+      inflationDragPct,
       feeCoveragePct,
       stakeValueUSD,
     });
@@ -499,6 +523,10 @@ function calculateMetadata(steps: StakingStep[], model: StakingModel): any {
     steps.reduce((sum, step) => sum + step.grossAPR, 0) / steps.length;
   const avgNetAPR =
     steps.reduce((sum, step) => sum + step.netAPR, 0) / steps.length;
+  const avgRealAPY =
+    steps.reduce((sum, step) => sum + step.realAPY, 0) / steps.length;
+  const avgInflationDrag =
+    steps.reduce((sum, step) => sum + step.inflationDragPct, 0) / steps.length;
   const avgFeeCoverage =
     steps.reduce((sum, step) => sum + step.feeCoveragePct, 0) / steps.length;
 
@@ -524,6 +552,8 @@ function calculateMetadata(steps: StakingStep[], model: StakingModel): any {
     finalStakingRatio: finalStep.stakingRatio,
     avgGrossAPR,
     avgNetAPR,
+    avgRealAPY,
+    avgInflationDrag,
     avgFeeCoverage,
     totalStakeValueUSD: finalStep.stakeValueUSD,
     rewardRunwayMonths,

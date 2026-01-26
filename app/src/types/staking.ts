@@ -105,6 +105,22 @@ export interface StakingMechanics {
   maxStakePctOfSupply?: number; // 0-1, optional cap
 }
 
+// ========== Unstaking Queue (Optional Advanced Feature) ==========
+
+export interface UnstakingQueueConfig {
+  enabled: boolean;
+  maxExitPerStepPct: number; // max % of staked tokens that can exit per step (e.g., 0.02 = 2%)
+  baseProcessingSteps: number; // minimum steps to process (e.g., 1)
+  queueMultiplierAtCongestion: number; // how much longer queue gets when congested (e.g., 5x)
+}
+
+export interface UnstakingQueueState {
+  queuedTokens: number;
+  estimatedWaitSteps: number;
+  congestionLevel: "low" | "medium" | "high" | "severe";
+  exitRatePct: number; // current exit rate as % of staked
+}
+
 // ========== Demand Model ==========
 
 export interface LockupPenaltyModel {
@@ -261,6 +277,9 @@ export interface StakingModel {
   liquidStaking?: LiquidStakingConfig;
   restaking?: RestakingConfig;
   veGovernance?: VEGovernanceConfig;
+  
+  // Advanced features (optional)
+  unstakingQueue?: UnstakingQueueConfig;
 }
 
 // ========== Computation Outputs ==========
@@ -276,6 +295,8 @@ export interface StakingStep {
   rewardsToStakers: number; // in tokens
   grossAPR: number;
   netAPR: number;
+  realAPY: number; // inflation-adjusted return (netAPR minus dilution from inflation)
+  inflationDragPct: number; // the dilution effect from inflation on non-stakers
   feeCoveragePct: number; // % of rewards from fees
   stakeValueUSD: number;
 }
@@ -293,6 +314,8 @@ export interface StakingOutputs {
     finalStakingRatio: number;
     avgGrossAPR: number;
     avgNetAPR: number;
+    avgRealAPY: number; // inflation-adjusted average return
+    avgInflationDrag: number; // average dilution from inflation
     avgFeeCoverage: number;
     totalStakeValueUSD: number;
     rewardRunwayMonths: number;
